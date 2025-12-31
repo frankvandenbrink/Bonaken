@@ -36,6 +36,12 @@ interface GameContextType {
   gameScores: Record<string, number>;
   bonakenSucceeded: boolean | null;
 
+  // Game end state
+  loserId: string | null;
+
+  // Rematch state
+  rematchRequests: string[];
+
   // Error handling
   error: string | null;
   clearError: () => void;
@@ -49,6 +55,7 @@ interface GameContextType {
   makeBonakChoice: (choice: 'bonaken' | 'passen') => void;
   selectTrump: (suit: Suit) => void;
   playCard: (cardId: string) => void;
+  requestRematch: () => void;
 }
 
 const defaultSettings: GameSettings = {
@@ -89,6 +96,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [roundScores, setRoundScores] = useState<Record<string, number> | null>(null);
   const [gameScores, setGameScores] = useState<Record<string, number>>({});
   const [bonakenSucceeded, setBonakenSucceeded] = useState<boolean | null>(null);
+
+  // Game end state
+  const [loserId, setLoserId] = useState<string | null>(null);
+
+  // Rematch state
+  const [rematchRequests, setRematchRequests] = useState<string[]>([]);
 
   // Error state
   const [error, setError] = useState<string | null>(null);
@@ -233,10 +246,32 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setGameScores(scores);
       }),
 
-      on('game-ended', ({ loserId, finalScores }) => {
+      on('game-ended', ({ loserId: loser, finalScores }) => {
         setGamePhase('game-end');
         setGameScores(finalScores);
-        console.log(`Game ended! Loser: ${loserId}`);
+        setLoserId(loser);
+        setRematchRequests([]); // Reset rematch requests
+        console.log(`Game ended! Loser: ${loser}`);
+      }),
+
+      on('rematch-requested', ({ playerId: requesterId, nickname: requesterName }) => {
+        setRematchRequests(prev =>
+          prev.includes(requesterId) ? prev : [...prev, requesterId]
+        );
+        console.log(`${requesterName} wil een rematch`);
+      }),
+
+      on('rematch-started', () => {
+        setRematchRequests([]);
+        setGameScores({});
+        setRoundScores(null);
+        setBonakenSucceeded(null);
+        setBonaker(null);
+        setTrump(null);
+        setCurrentTrick([]);
+        setTrickWinner(null);
+        setLoserId(null);
+        console.log('Rematch gestart!');
       }),
 
       on('error', ({ message }) => {
@@ -302,6 +337,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     emit('play-card', { cardId });
   }, [emit]);
 
+  const requestRematch = useCallback(() => {
+    emit('request-rematch');
+  }, [emit]);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -331,6 +370,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       roundScores,
       gameScores,
       bonakenSucceeded,
+      loserId,
+      rematchRequests,
       error,
       clearError,
       createGame,
@@ -340,7 +381,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       leaveGame,
       makeBonakChoice,
       selectTrump,
-      playCard
+      playCard,
+      requestRematch
     }}>
       {children}
     </GameContext.Provider>

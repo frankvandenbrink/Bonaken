@@ -4,6 +4,7 @@ import { BonakenPhase } from './BonakenPhase';
 import { TrumpSelection } from './TrumpSelection';
 import { PlayingPhase } from './PlayingPhase';
 import { RoundEnd } from './RoundEnd';
+import { GameEnd } from './GameEnd';
 import styles from './GameScreen.module.css';
 
 /**
@@ -65,6 +66,8 @@ export function GameScreen() {
           {gamePhase === 'playing' && <PlayingPhase />}
 
           {gamePhase === 'round-end' && <RoundEnd />}
+
+          {gamePhase === 'game-end' && <GameEnd />}
 
           {gamePhase === 'dealing' && (
             <div className={styles.dealing}>

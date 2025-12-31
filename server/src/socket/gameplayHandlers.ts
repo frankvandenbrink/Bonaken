@@ -232,6 +232,63 @@ function handleGameEnd(io: TypedServer, game: GameState, loserId: string) {
 }
 
 /**
+ * Reset het spel voor een rematch
+ */
+function resetForRematch(game: GameState) {
+  // Reset alle scores
+  game.players.forEach(p => {
+    p.score = 0;
+    p.tricksWon = 0;
+    p.hand = [];
+  });
+
+  // Roteer deler naar volgende speler
+  const currentDealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
+  const nextDealerIndex = (currentDealerIndex + 1) % game.players.length;
+  game.currentDealer = game.players[nextDealerIndex].id;
+
+  // Reset game state
+  game.bonaker = null;
+  game.trump = null;
+  game.currentTrick = [];
+  game.roundNumber = 1;
+  game.rematchRequests = [];
+  game.sleepingCards = [];
+  game.bonakenChoices = [];
+}
+
+/**
+ * Verwerk een rematch verzoek
+ */
+function handleRematchRequest(io: TypedServer, socket: TypedSocket, game: GameState) {
+  const player = game.players.find(p => p.id === socket.id);
+  if (!player) return;
+
+  // Voeg toe aan rematch requests als nog niet aanwezig
+  if (!game.rematchRequests.includes(socket.id)) {
+    game.rematchRequests.push(socket.id);
+    console.log(`${player.nickname} wil een rematch (${game.rematchRequests.length}/${game.players.length})`);
+
+    io.to(game.code).emit('rematch-requested', {
+      playerId: socket.id,
+      nickname: player.nickname
+    });
+  }
+
+  // Check of iedereen rematch wil
+  if (game.rematchRequests.length === game.players.length) {
+    console.log('Iedereen wil rematch - nieuw spel starten!');
+    resetForRematch(game);
+    io.to(game.code).emit('rematch-started');
+
+    // Start nieuw spel (kaarten delen etc.)
+    startNextRound(io, game);
+  }
+
+  game.lastActivity = Date.now();
+}
+
+/**
  * Start een nieuwe ronde
  */
 function startNextRound(io: TypedServer, game: GameState) {
@@ -310,6 +367,22 @@ export function setupGameplayHandlers(io: TypedServer, socket: TypedSocket) {
     }
 
     handlePlayCard(io, socket, game, cardId);
+  });
+
+  socket.on('request-rematch', () => {
+    const game = gameManager.getGameByPlayerId(socket.id);
+
+    if (!game) {
+      socket.emit('error', { message: 'Je bent niet in een spel' });
+      return;
+    }
+
+    if (game.phase !== 'game-end') {
+      socket.emit('error', { message: 'Het spel is nog niet afgelopen' });
+      return;
+    }
+
+    handleRematchRequest(io, socket, game);
   });
 }
 

@@ -1,0 +1,699 @@
+/* GameEnd - Victorian Casino Theatrical Finale */
+
+.container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    ellipse at center top,
+    #3d2318 0%,
+    #2c1810 40%,
+    #1a0f0a 100%
+  );
+  overflow: hidden;
+}
+
+/* Floating card suit particles */
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  top: -40px;
+  font-size: 1.5rem;
+  color: rgba(212, 175, 55, 0.15);
+  animation: floatDown 8s ease-in-out infinite;
+}
+
+@keyframes floatDown {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.15;
+  }
+  90% {
+    opacity: 0.15;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Theatrical curtains */
+.curtainLeft,
+.curtainRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  background: linear-gradient(
+    90deg,
+    #4a1c1c 0%,
+    #6b2424 30%,
+    #8b3030 70%,
+    #6b2424 100%
+  );
+  z-index: 10;
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
+}
+
+.curtainLeft {
+  left: 0;
+  transform: translateX(0);
+  background: repeating-linear-gradient(
+    90deg,
+    #5a2020 0px,
+    #7a2828 20px,
+    #5a2020 40px
+  );
+}
+
+.curtainRight {
+  right: 0;
+  transform: translateX(0);
+  background: repeating-linear-gradient(
+    90deg,
+    #5a2020 0px,
+    #7a2828 20px,
+    #5a2020 40px
+  );
+}
+
+.curtainLeft.open {
+  transform: translateX(-100%);
+}
+
+.curtainRight.open {
+  transform: translateX(100%);
+}
+
+/* Spotlight effect */
+.spotlight {
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 248, 220, 0.1) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+/* Main stage content */
+.stage {
+  position: relative;
+  z-index: 5;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stage.revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Ornate frame */
+.frame {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(44, 24, 16, 0.95) 0%,
+    rgba(26, 15, 10, 0.98) 100%
+  );
+  border: 3px solid rgba(212, 175, 55, 0.4);
+  border-radius: 12px;
+  padding: 2.5rem;
+  min-width: 420px;
+  max-width: 520px;
+  box-shadow:
+    0 0 80px rgba(0, 0, 0, 0.6),
+    0 0 40px rgba(212, 175, 55, 0.1) inset,
+    0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Decorative frame corners */
+.frameCorner {
+  position: absolute;
+  font-size: 1.75rem;
+  color: #d4af37;
+  opacity: 0.6;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.frameCorner[data-position="tl"] {
+  top: 0.5rem;
+  left: 0.75rem;
+}
+
+.frameCorner[data-position="tr"] {
+  top: 0.5rem;
+  right: 0.75rem;
+  color: #c41e3a;
+}
+
+.frameCorner[data-position="bl"] {
+  bottom: 0.5rem;
+  left: 0.75rem;
+}
+
+.frameCorner[data-position="br"] {
+  bottom: 0.5rem;
+  right: 0.75rem;
+  color: #c41e3a;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.headerOrnament {
+  font-size: 0.9rem;
+  color: rgba(212, 175, 55, 0.5);
+  letter-spacing: 0.5em;
+  margin: 0.5rem 0;
+}
+
+.title {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #d4af37;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin: 0;
+  text-shadow:
+    0 2px 15px rgba(212, 175, 55, 0.4),
+    0 0 30px rgba(212, 175, 55, 0.2);
+}
+
+.subtitle {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 1rem;
+  color: rgba(245, 245, 220, 0.7);
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
+}
+
+/* Scoreboard */
+.scoreboard {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.scoreboardHeader {
+  display: grid;
+  grid-template-columns: 50px 1fr 80px;
+  padding: 0.75rem 1rem;
+  background: rgba(212, 175, 55, 0.15);
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(212, 175, 55, 0.8);
+}
+
+.colRank {
+  text-align: center;
+}
+
+.colName {
+  text-align: left;
+}
+
+.colScore {
+  text-align: center;
+}
+
+.scoreboardBody {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Player row */
+.playerRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 50px 1fr 80px;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  opacity: 0;
+  transform: translateX(-30px);
+  animation: rowSlideIn 0.5s ease-out forwards;
+}
+
+@keyframes rowSlideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.playerRow:last-child {
+  border-bottom: none;
+}
+
+/* Winner row */
+.winnerRow {
+  background: linear-gradient(
+    90deg,
+    rgba(74, 124, 78, 0.2) 0%,
+    rgba(74, 124, 78, 0.1) 100%
+  );
+}
+
+/* Current player row */
+.meRow {
+  background: linear-gradient(
+    90deg,
+    rgba(212, 175, 55, 0.15) 0%,
+    rgba(212, 175, 55, 0.05) 100%
+  );
+}
+
+/* Loser row - dramatic styling */
+.loserRow {
+  background: linear-gradient(
+    90deg,
+    rgba(196, 30, 58, 0.3) 0%,
+    rgba(196, 30, 58, 0.15) 50%,
+    rgba(196, 30, 58, 0.3) 100%
+  );
+  animation: rowSlideIn 0.5s ease-out forwards, loserPulse 2s ease-in-out infinite 1.5s;
+}
+
+@keyframes loserPulse {
+  0%, 100% {
+    box-shadow: inset 0 0 20px rgba(196, 30, 58, 0.2);
+  }
+  50% {
+    box-shadow: inset 0 0 40px rgba(196, 30, 58, 0.4);
+  }
+}
+
+/* Flame effect on loser row */
+.flameEffect {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    transparent 60%,
+    rgba(255, 100, 50, 0.1) 100%
+  );
+  pointer-events: none;
+  animation: flicker 0.15s ease-in-out infinite alternate;
+}
+
+@keyframes flicker {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Rank column */
+.rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rankNumber {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 1rem;
+  color: rgba(245, 245, 220, 0.5);
+}
+
+.crownIcon {
+  font-size: 1.4rem;
+  color: #d4af37;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  animation: crownGlow 2s ease-in-out infinite;
+}
+
+@keyframes crownGlow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.3);
+  }
+}
+
+.loserIcon {
+  font-size: 1.4rem;
+  color: #c41e3a;
+  animation: skullShake 0.5s ease-in-out infinite;
+}
+
+@keyframes skullShake {
+  0%, 100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+/* Player name column */
+.playerName {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nameText {
+  color: #f5f5dc;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.meBadge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(212, 175, 55, 0.25);
+  color: #d4af37;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rematchBadge {
+  font-size: 0.9rem;
+  color: #4a7c4e;
+  animation: spinRematch 2s linear infinite;
+}
+
+@keyframes spinRematch {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Score column */
+.score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+.loserScore {
+  color: #e57373;
+  text-shadow: 0 0 15px rgba(196, 30, 58, 0.5);
+}
+
+.scoreFire {
+  font-size: 1rem;
+  animation: fireFlicker 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes fireFlicker {
+  from {
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Rematch status */
+.rematchStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  background: rgba(74, 124, 78, 0.15);
+  border: 1px solid rgba(74, 124, 78, 0.3);
+  border-radius: 8px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rematchIcon {
+  font-size: 1.25rem;
+  color: #4a7c4e;
+  animation: spinRematch 3s linear infinite;
+}
+
+.rematchText {
+  color: rgba(245, 245, 220, 0.8);
+  font-size: 0.9rem;
+}
+
+.rematchCount {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a7c4e;
+  padding: 0.2rem 0.5rem;
+  background: rgba(74, 124, 78, 0.2);
+  border-radius: 4px;
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Rematch button - styled like a casino chip */
+.rematchButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(
+    180deg,
+    #4a7c4e 0%,
+    #3a6a3e 50%,
+    #2a5a2e 100%
+  );
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  color: #fff;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.rematchButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(74, 124, 78, 0.3);
+}
+
+.rematchButton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.rematchButton:disabled,
+.rematchButton.requested {
+  background: linear-gradient(
+    180deg,
+    #5a5a5a 0%,
+    #4a4a4a 50%,
+    #3a3a3a 100%
+  );
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.buttonChip {
+  font-size: 1.25rem;
+  opacity: 0.7;
+}
+
+.buttonText {
+  flex: 1;
+  text-align: center;
+}
+
+/* Leave button */
+.leaveButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: 1px solid rgba(245, 245, 220, 0.3);
+  border-radius: 8px;
+  color: rgba(245, 245, 220, 0.7);
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.leaveButton:hover {
+  background: rgba(245, 245, 220, 0.1);
+  border-color: rgba(245, 245, 220, 0.5);
+  color: #f5f5dc;
+}
+
+.leaveIcon {
+  font-size: 1.1rem;
+}
+
+/* Victory/Defeat verdict overlay */
+.verdict {
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  opacity: 0;
+  animation: verdictReveal 1s ease-out 1.5s forwards;
+}
+
+@keyframes verdictReveal {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(2);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.verdictText {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  text-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.8),
+    0 0 60px currentColor;
+}
+
+.victory .verdictText {
+  color: #d4af37;
+  animation: victoryGlow 2s ease-in-out infinite;
+}
+
+@keyframes victoryGlow {
+  0%, 100% {
+    text-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.8),
+      0 0 40px rgba(212, 175, 55, 0.5);
+  }
+  50% {
+    text-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.8),
+      0 0 80px rgba(212, 175, 55, 0.8);
+  }
+}
+
+.defeat .verdictText {
+  color: #c41e3a;
+  animation: defeatShake 0.5s ease-in-out 1.5s;
+}
+
+@keyframes defeatShake {
+  0%, 100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  .frame {
+    min-width: auto;
+    width: calc(100% - 2rem);
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .verdictText {
+    font-size: 2rem;
+    letter-spacing: 0.15em;
+  }
+
+  .scoreboardHeader,
+  .playerRow {
+    grid-template-columns: 40px 1fr 60px;
+    padding: 0.75rem;
+  }
+
+  .score {
+    font-size: 1.25rem;
+  }
+
+  .rematchButton {
+    padding: 0.85rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}

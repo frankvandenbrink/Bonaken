@@ -67,6 +67,7 @@ export interface GameState {
   roundNumber: number;
   lastActivity: number;
   sleepingCards: Card[]; // Slapende kaarten (voor bonaker)
+  rematchRequests: string[]; // Player IDs die rematch willen
 }
 
 // Socket event types
@@ -89,6 +90,8 @@ export interface ServerToClientEvents {
   'round-scores': (data: { scores: Record<string, number>; bonakenSucceeded: boolean | null }) => void;
   'game-scores': (data: { scores: Record<string, number> }) => void;
   'game-ended': (data: { loserId: string; finalScores: Record<string, number> }) => void;
+  'rematch-requested': (data: { playerId: string; nickname: string }) => void;
+  'rematch-started': () => void;
   'player-disconnected': (data: { playerId: string; nickname: string }) => void;
   'player-reconnected': (data: { playerId: string; nickname: string }) => void;
   'error': (data: { message: string }) => void;

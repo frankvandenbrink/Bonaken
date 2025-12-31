@@ -36,7 +36,8 @@ export class GameManager {
       currentTrick: [],
       roundNumber: 0,
       lastActivity: Date.now(),
-      sleepingCards: []
+      sleepingCards: [],
+      rematchRequests: []
     };
 
     this.games.set(code, game);
