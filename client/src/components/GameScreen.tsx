@@ -1,6 +1,7 @@
 import { useGame } from '../contexts/GameContext';
 import { Hand } from './Hand';
 import { BonakenPhase } from './BonakenPhase';
+import { TrumpSelection } from './TrumpSelection';
 import styles from './GameScreen.module.css';
 
 /**
@@ -46,17 +47,7 @@ export function GameScreen() {
         <div className={styles.centerArea}>
           {gamePhase === 'bonaken' && <BonakenPhase />}
 
-          {gamePhase === 'trump-selection' && (
-            <div className={styles.trumpSelection}>
-              <h2>Troef Kiezen</h2>
-              {trumpSelector === playerId ? (
-                <p>Kies een troefkleur...</p>
-              ) : (
-                <p>Wachten op troefkeuze...</p>
-              )}
-              {/* TODO: Add trump selection UI in Fase 5 */}
-            </div>
-          )}
+          {gamePhase === 'trump-selection' && <TrumpSelection />}
 
           {gamePhase === 'dealing' && (
             <div className={styles.dealing}>

@@ -1,0 +1,512 @@
+/* TrumpSelection.module.css - Ceremonial trump suit selection */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  min-height: 400px;
+  animation: fadeIn 0.5s ease;
+}
+
+/* ============================================
+   SELECTION STATE - The dramatic choice moment
+   ============================================ */
+
+.selectionState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  max-width: 600px;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.ornament {
+  color: var(--gold);
+  font-size: 1.5rem;
+  opacity: 0.8;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--gold);
+  margin: 0;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 15px rgba(212, 175, 55, 0.4);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--cream);
+  opacity: 0.8;
+  font-style: italic;
+  margin-bottom: var(--space-md);
+}
+
+/* Suits Grid */
+.suitsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+  width: 100%;
+  max-width: 500px;
+}
+
+.suitButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-lg);
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--wood-light);
+  border-radius: 16px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  animation: slideUp 0.5s ease backwards;
+}
+
+.suitButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  pointer-events: none;
+}
+
+.suitButton:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--gold);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(212, 175, 55, 0.2);
+}
+
+.suitButton:active {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* Red suits (harten, ruiten) */
+.suitButton.red {
+  background: linear-gradient(
+    135deg,
+    rgba(180, 40, 40, 0.15) 0%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+}
+
+.suitButton.red:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(180, 40, 40, 0.25) 0%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  border-color: #c44;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(200, 60, 60, 0.3);
+}
+
+.suitButton.red .suitSymbol {
+  color: #e44;
+  text-shadow: 0 0 20px rgba(255, 80, 80, 0.5);
+}
+
+.suitButton.red:hover .suitSymbol {
+  text-shadow:
+    0 0 30px rgba(255, 80, 80, 0.7),
+    0 0 60px rgba(255, 80, 80, 0.4);
+}
+
+/* Black suits (klaveren, schoppen) */
+.suitButton.black {
+  background: linear-gradient(
+    135deg,
+    rgba(40, 40, 50, 0.4) 0%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+}
+
+.suitButton.black:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(60, 60, 80, 0.5) 0%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  border-color: var(--cream);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(255, 255, 255, 0.15);
+}
+
+.suitButton.black .suitSymbol {
+  color: var(--cream);
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.suitButton.black:hover .suitSymbol {
+  text-shadow:
+    0 0 25px rgba(255, 255, 255, 0.5),
+    0 0 50px rgba(255, 255, 255, 0.3);
+}
+
+.suitInner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  z-index: 1;
+}
+
+.suitSymbol {
+  font-size: 4rem;
+  line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.suitName {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--cream);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.suitGlow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(212, 175, 55, 0.15) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.suitButton:hover .suitGlow {
+  opacity: 1;
+}
+
+.hint {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--cream);
+  opacity: 0.5;
+  font-style: italic;
+  margin-top: var(--space-sm);
+}
+
+/* ============================================
+   WAITING STATE - Anticipation for non-selectors
+   ============================================ */
+
+.waitingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  text-align: center;
+}
+
+.waitingIcon {
+  position: relative;
+}
+
+.cardBack {
+  font-size: 5rem;
+  opacity: 0.6;
+  animation: float 3s ease-in-out infinite;
+}
+
+.waitingTitle {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.waitingSubtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--cream);
+  opacity: 0.8;
+}
+
+.selectorName {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.waitingDots {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.4;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ============================================
+   SELECTED STATE - Celebration
+   ============================================ */
+
+.selectedState {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  animation: fadeIn 0.6s ease;
+}
+
+.selectedHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.crownIcon {
+  font-size: 2.5rem;
+  color: var(--gold);
+  animation: crownPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5));
+}
+
+.selectedTitle {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.selectedSuit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl);
+  background: rgba(0, 0, 0, 0.3);
+  border: 3px solid var(--gold);
+  border-radius: 20px;
+  animation: suitReveal 0.8s ease;
+}
+
+.selectedSuit.red .selectedSymbol {
+  color: #e44;
+  text-shadow:
+    0 0 30px rgba(255, 80, 80, 0.6),
+    0 0 60px rgba(255, 80, 80, 0.3);
+}
+
+.selectedSuit.black .selectedSymbol {
+  color: var(--cream);
+  text-shadow:
+    0 0 30px rgba(255, 255, 255, 0.5),
+    0 0 60px rgba(255, 255, 255, 0.2);
+}
+
+.selectedSymbol {
+  font-size: 6rem;
+  line-height: 1;
+  animation: symbolPulse 2s ease-in-out infinite;
+}
+
+.selectedName {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--cream);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Radiance effect behind selected suit */
+.radiance {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.radianceRing {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  opacity: 0;
+  animation: radiateOut 3s ease-in-out infinite;
+}
+
+.continueHint {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--cream);
+  opacity: 0.6;
+  font-style: italic;
+  margin-top: var(--space-md);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes crownPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.7));
+  }
+}
+
+@keyframes suitReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotateY(90deg);
+  }
+  50% {
+    transform: scale(1.1) rotateY(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+  }
+}
+
+@keyframes symbolPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes radiateOut {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--space-md);
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .suitsGrid {
+    gap: var(--space-md);
+  }
+
+  .suitButton {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .suitSymbol {
+    font-size: 3rem;
+  }
+
+  .suitName {
+    font-size: 0.9rem;
+  }
+
+  .selectedSymbol {
+    font-size: 4rem;
+  }
+}
