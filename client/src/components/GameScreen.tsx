@@ -1,12 +1,13 @@
 import { useGame } from '../contexts/GameContext';
 import { Hand } from './Hand';
+import { BonakenPhase } from './BonakenPhase';
 import styles from './GameScreen.module.css';
 
 /**
  * Main game screen - shows current game phase and player's hand
  */
 export function GameScreen() {
-  const { gameCode, gamePhase, players, hand, trump, playerId, nickname } = useGame();
+  const { gameCode, gamePhase, players, hand, trump, playerId, nickname, trumpSelector } = useGame();
 
   // Get current player's info
   const currentPlayer = players.find(p => p.id === playerId);
@@ -43,12 +44,17 @@ export function GameScreen() {
 
         {/* Center area - phase specific content */}
         <div className={styles.centerArea}>
-          {gamePhase === 'bonaken' && (
-            <div className={styles.bonakenPhase}>
-              <h2>Bonaken Fase</h2>
-              <p>Bekijk je kaarten en kies of je wilt bonaken of passen.</p>
-              <p className={styles.cardCount}>Je hebt {hand.length} kaarten</p>
-              {trump && <p className={styles.trump}>Troef: {trump}</p>}
+          {gamePhase === 'bonaken' && <BonakenPhase />}
+
+          {gamePhase === 'trump-selection' && (
+            <div className={styles.trumpSelection}>
+              <h2>Troef Kiezen</h2>
+              {trumpSelector === playerId ? (
+                <p>Kies een troefkleur...</p>
+              ) : (
+                <p>Wachten op troefkeuze...</p>
+              )}
+              {/* TODO: Add trump selection UI in Fase 5 */}
             </div>
           )}
 

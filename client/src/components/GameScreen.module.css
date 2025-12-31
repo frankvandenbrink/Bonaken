@@ -148,6 +148,23 @@
   color: var(--felt-green-light) !important;
 }
 
+/* Trump selection phase */
+.trumpSelection {
+  animation: fadeIn 0.5s ease;
+}
+
+.trumpSelection h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--gold);
+  margin-bottom: var(--space-md);
+}
+
+.trumpSelection p {
+  color: var(--cream);
+  opacity: 0.9;
+}
+
 /* Dealing animation */
 .dealing {
   animation: fadeIn 0.5s ease;

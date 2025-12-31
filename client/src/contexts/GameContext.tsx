@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useSocket } from '../hooks/useSocket';
-import type { GameState, Player, GameSettings, Card, Suit } from '@shared/index';
+import type { GameState, Player, GameSettings, Card, Suit, BonakChoice } from '@shared/index';
 
 interface GameContextType {
   // Connection
@@ -20,6 +20,13 @@ interface GameContextType {
   hand: Card[];
   trump: Suit | null;
 
+  // Bonaken state
+  bonakenChoices: BonakChoice[];
+  bonaker: string | null;
+  chosenCount: number;
+  hasChosen: boolean;
+  trumpSelector: string | null;
+
   // Error handling
   error: string | null;
   clearError: () => void;
@@ -30,6 +37,8 @@ interface GameContextType {
   updateSettings: (settings: GameSettings) => void;
   startGame: () => void;
   leaveGame: () => void;
+  makeBonakChoice: (choice: 'bonaken' | 'passen') => void;
+  selectTrump: (suit: Suit) => void;
 }
 
 const defaultSettings: GameSettings = {
@@ -56,6 +65,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [hand, setHand] = useState<Card[]>([]);
   const [trump, setTrump] = useState<Suit | null>(null);
 
+  // Bonaken state
+  const [bonakenChoices, setBonakenChoices] = useState<BonakChoice[]>([]);
+  const [bonaker, setBonaker] = useState<string | null>(null);
+  const [chosenCount, setChosenCount] = useState(0);
+  const [trumpSelector, setTrumpSelector] = useState<string | null>(null);
+
   // Error state
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +82,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Computed
   const isHost = players.find(p => p.id === playerId)?.isHost ?? false;
+  const hasChosen = bonakenChoices.find(c => c.playerId === playerId)?.choice !== null &&
+                   bonakenChoices.find(c => c.playerId === playerId)?.choice !== undefined;
 
   // Socket event handlers
   useEffect(() => {
@@ -85,6 +102,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setGamePhase(state.phase);
         setPlayers(state.players);
         setSettings(state.settings);
+        // Initialize bonaken choices if in bonaken phase
+        if (state.phase === 'bonaken' && state.players.length > 0) {
+          setBonakenChoices(state.players.map(p => ({
+            playerId: p.id,
+            choice: null
+          })));
+        }
       }),
 
       on('lobby-updated', ({ players: newPlayers, settings: newSettings }) => {
@@ -111,6 +135,37 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       on('bonaken-phase-start', () => {
         setGamePhase('bonaken');
+        setChosenCount(0);
+        setBonaker(null);
+        // Initialize bonaken choices for all players
+        setBonakenChoices(players.map(p => ({
+          playerId: p.id,
+          choice: null
+        })));
+      }),
+
+      on('player-chose', ({ playerId: chosenPlayerId }) => {
+        setChosenCount(prev => prev + 1);
+        // Update local choices to mark this player as having chosen
+        setBonakenChoices(prev =>
+          prev.map(c =>
+            c.playerId === chosenPlayerId
+              ? { ...c, choice: c.choice ?? 'passen' } // Mark as chosen but don't reveal
+              : c
+          )
+        );
+      }),
+
+      on('bonaken-revealed', ({ choices, bonaker: winner }) => {
+        setBonakenChoices(choices);
+        setBonaker(winner);
+        console.log('Bonaken revealed:', choices, 'Winner:', winner);
+      }),
+
+      on('trump-selection-start', ({ selectorId }) => {
+        setGamePhase('trump-selection');
+        setTrumpSelector(selectorId);
+        console.log('Trump selection started, selector:', selectorId);
       }),
 
       on('trump-selected', ({ trump: selectedTrump }) => {
@@ -168,6 +223,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     window.location.reload();
   }, []);
 
+  const makeBonakChoice = useCallback((choice: 'bonaken' | 'passen') => {
+    emit('bonaken-choice', { choice });
+  }, [emit]);
+
+  const selectTrump = useCallback((suit: Suit) => {
+    emit('select-trump', { suit });
+  }, [emit]);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -185,13 +248,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
       settings,
       hand,
       trump,
+      bonakenChoices,
+      bonaker,
+      chosenCount,
+      hasChosen,
+      trumpSelector,
       error,
       clearError,
       createGame,
       joinGame,
       updateSettings,
       startGame,
-      leaveGame
+      leaveGame,
+      makeBonakChoice,
+      selectTrump
     }}>
       {children}
     </GameContext.Provider>

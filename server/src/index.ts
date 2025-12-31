@@ -7,6 +7,7 @@ import type {
   ClientToServerEvents
 } from '../../shared/src/index';
 import { setupLobbyHandlers } from './socket/lobbyHandlers';
+import { setupBonakenHandlers } from './socket/bonakenHandlers';
 import { gameManager } from './game/GameManager';
 
 const app = express();
@@ -28,8 +29,9 @@ app.get('/health', (req, res) => {
 io.on('connection', (socket) => {
   console.log('Speler verbonden:', socket.id);
 
-  // Setup lobby handlers voor deze socket
+  // Setup handlers voor deze socket
   setupLobbyHandlers(io, socket);
+  setupBonakenHandlers(io, socket);
 });
 
 // Cleanup inactieve games elke minuut
