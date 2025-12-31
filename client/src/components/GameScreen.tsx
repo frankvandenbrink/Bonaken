@@ -3,6 +3,7 @@ import { Hand } from './Hand';
 import { BonakenPhase } from './BonakenPhase';
 import { TrumpSelection } from './TrumpSelection';
 import { PlayingPhase } from './PlayingPhase';
+import { RoundEnd } from './RoundEnd';
 import styles from './GameScreen.module.css';
 
 /**
@@ -62,6 +63,8 @@ export function GameScreen() {
           {gamePhase === 'trump-selection' && <TrumpSelection />}
 
           {gamePhase === 'playing' && <PlayingPhase />}
+
+          {gamePhase === 'round-end' && <RoundEnd />}
 
           {gamePhase === 'dealing' && (
             <div className={styles.dealing}>

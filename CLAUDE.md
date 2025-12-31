@@ -44,7 +44,7 @@ After completing each phase:
 - [x] Fase 4: Bonaken Phase
 - [x] Fase 5: Trump Selection
 - [x] Fase 6: Trick-Taking
-- [ ] Fase 7: Scoring
+- [x] Fase 7: Scoring
 - [ ] Fase 8: Game End/Rematch
 - [ ] Fase 9: Disconnect Handling
 - [ ] Fase 10: Visual Polish

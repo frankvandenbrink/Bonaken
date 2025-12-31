@@ -293,43 +293,49 @@ Na elke fase:
 
 ---
 
-## Fase 7: Puntentelling
+## Fase 7: Puntentelling [VOLTOOID]
 
 **Doel:** Scoring per ronde, 10 punten = verloren
 
 ### Server
-- [ ] `src/game/scoring.ts`:
-  - [ ] `calculateRoundScores()`:
-    - [ ] Bonaken geslaagd (meerderheid slagen): +1 voor alle anderen
-    - [ ] Bonaken mislukt: +3 voor bonaker
-    - [ ] Geen bonaker: +1 voor speler(s) met minste slagen
-  - [ ] `checkGameEnd()` - Speler met 10+ punten
-  - [ ] Meerderheid berekening per speler aantal
-- [ ] Socket events:
-  - [ ] `round-scores` emit met punten deze ronde
-  - [ ] `game-scores` emit met totale stand
+- [x] Scoring logica in `gameplayHandlers.ts`:
+  - [x] `handleRoundComplete()`:
+    - [x] Bonaken geslaagd (meerderheid slagen): +1 voor alle anderen
+    - [x] Bonaken mislukt: +3 voor bonaker
+    - [x] Geen bonaker: +1 voor speler(s) met minste slagen
+  - [x] `handleGameEnd()` - Speler met 10+ punten
+  - [x] Meerderheid berekening via `getMajorityThreshold()`
+- [x] Socket events:
+  - [x] `round-scores` emit met punten deze ronde
+  - [x] `game-scores` emit met totale stand
 
 ### Client
-- [ ] `src/components/RoundEnd.tsx`:
-  - [ ] Overzicht slagen per speler
-  - [ ] Bonaken resultaat (geslaagd/mislukt)
-  - [ ] Punten toegekend deze ronde
-  - [ ] Bijgewerkte totaalscores
-  - [ ] "Volgende ronde" countdown/knop
-- [ ] `src/components/ScoreBoard.tsx`:
+- [x] `src/components/RoundEnd.tsx`:
+  - [x] Overzicht slagen per speler
+  - [x] Bonaken resultaat (geslaagd/mislukt)
+  - [x] Punten toegekend deze ronde
+  - [x] Bijgewerkte totaalscores
+  - [x] Auto-countdown naar volgende ronde (5 sec)
+  - [x] Danger highlighting voor spelers dichtbij 10
+- [x] `src/components/RoundEnd.module.css`:
+  - [x] Theatrical reveal animaties
+  - [x] Casino-stijl aesthetiek
+  - [x] Responsive design
+- [ ] `src/components/ScoreBoard.tsx`: (TODO later)
   - [ ] Altijd zichtbaar tijdens spel
   - [ ] Speler namen met scores
   - [ ] Highlight speler dichtbij 10
 
 ### Test Criteria
-- [ ] Na alle slagen: ronde einde scherm
-- [ ] Bonaken geslaagd = meerderheid slagen
-- [ ] Bonaken geslaagd: anderen krijgen +1
-- [ ] Bonaken mislukt: bonaker krijgt +3
-- [ ] Geen bonaker: minste slagen krijgt +1
-- [ ] Bij gelijke minste slagen: allen +1
-- [ ] Scores worden opgeteld over rondes
-- [ ] Deler roteert naar volgende speler
+- [x] Na alle slagen: ronde einde scherm
+- [x] Bonaken geslaagd = meerderheid slagen
+- [x] Bonaken geslaagd: anderen krijgen +1 (logica geïmplementeerd)
+- [x] Bonaken mislukt: bonaker krijgt +3 (logica geïmplementeerd)
+- [x] Geen bonaker: minste slagen krijgt +1
+- [x] Bij gelijke minste slagen: allen +1 (logica geïmplementeerd)
+- [x] Scores worden opgeteld over rondes
+- [x] Deler roteert naar volgende speler
+- [x] Nieuwe ronde start automatisch na countdown
 
 ---
 

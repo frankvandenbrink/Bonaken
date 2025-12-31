@@ -1,0 +1,496 @@
+/* RoundEnd - Theatrical round summary with scoring reveal */
+
+.container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    #1a0f0a 0%,
+    #2c1810 40%,
+    #3d2318 100%
+  );
+  padding: 1rem;
+  overflow: hidden;
+}
+
+/* Corner flourishes */
+.flourishTopLeft,
+.flourishTopRight,
+.flourishBottomLeft,
+.flourishBottomRight {
+  position: absolute;
+  font-size: 3rem;
+  opacity: 0.15;
+  color: #d4af37;
+  font-family: 'Times New Roman', serif;
+}
+
+.flourishTopLeft {
+  top: 1.5rem;
+  left: 1.5rem;
+}
+
+.flourishTopRight {
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+.flourishBottomLeft {
+  bottom: 1.5rem;
+  left: 1.5rem;
+}
+
+.flourishBottomRight {
+  bottom: 1.5rem;
+  right: 1.5rem;
+}
+
+/* Main card */
+.resultCard {
+  background: linear-gradient(
+    180deg,
+    rgba(44, 24, 16, 0.95) 0%,
+    rgba(30, 16, 10, 0.98) 100%
+  );
+  border: 2px solid rgba(212, 175, 55, 0.4);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 100%;
+  box-shadow:
+    0 0 60px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(212, 175, 55, 0.1) inset;
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.resultCard.revealed {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.headerLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.5) 50%,
+    transparent 100%
+  );
+}
+
+.title {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #d4af37;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+  white-space: nowrap;
+}
+
+/* Bonaken result banner */
+.bonakenBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 1.1rem;
+  animation: bannerReveal 0.6s ease-out 0.3s both;
+}
+
+@keyframes bannerReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bonakenBanner.success {
+  background: linear-gradient(
+    135deg,
+    rgba(74, 124, 78, 0.3) 0%,
+    rgba(74, 124, 78, 0.15) 100%
+  );
+  border: 1px solid rgba(74, 124, 78, 0.5);
+  color: #8fbc8f;
+}
+
+.bonakenBanner.failed {
+  background: linear-gradient(
+    135deg,
+    rgba(196, 30, 58, 0.3) 0%,
+    rgba(196, 30, 58, 0.15) 100%
+  );
+  border: 1px solid rgba(196, 30, 58, 0.5);
+  color: #e57373;
+}
+
+.bonakenBanner.neutral {
+  background: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.15) 0%,
+    rgba(212, 175, 55, 0.05) 100%
+  );
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: rgba(245, 245, 220, 0.7);
+}
+
+.resultIcon {
+  font-size: 1.25rem;
+}
+
+.resultText {
+  text-align: center;
+}
+
+.resultText strong {
+  color: #f5f5dc;
+}
+
+/* Majority info */
+.majorityInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+  color: rgba(245, 245, 220, 0.6);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+.majorityLabel {
+  color: rgba(245, 245, 220, 0.5);
+}
+
+.majorityValue {
+  color: #d4af37;
+  font-weight: 600;
+}
+
+.majorityDivider {
+  color: rgba(245, 245, 220, 0.3);
+  margin: 0 0.25rem;
+}
+
+.majoritySuccess {
+  color: #8fbc8f !important;
+}
+
+.majorityFailed {
+  color: #e57373 !important;
+}
+
+/* Results table */
+.resultsTable {
+  margin-bottom: 1.5rem;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 100px;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 8px 8px 0 0;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(212, 175, 55, 0.8);
+}
+
+.tableBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 100px;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: rowReveal 0.4s ease-out forwards;
+}
+
+@keyframes rowReveal {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.tableRow.isMe {
+  background: rgba(212, 175, 55, 0.15);
+}
+
+.tableRow.isDanger {
+  background: rgba(196, 30, 58, 0.15);
+}
+
+.tableRow.isMe.isDanger {
+  background: linear-gradient(
+    90deg,
+    rgba(196, 30, 58, 0.2) 0%,
+    rgba(212, 175, 55, 0.15) 100%
+  );
+}
+
+/* Table columns */
+.colPlayer,
+.colTricks,
+.colRound,
+.colTotal {
+  display: flex;
+  align-items: center;
+}
+
+.colPlayer {
+  gap: 0.5rem;
+}
+
+.colTricks,
+.colRound,
+.colTotal {
+  justify-content: center;
+}
+
+.playerRank {
+  font-size: 0.75rem;
+  color: rgba(245, 245, 220, 0.4);
+  min-width: 1.5rem;
+}
+
+.playerName {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f5f5dc;
+  font-weight: 500;
+}
+
+.bonakerBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #d4af37 0%, #aa8a2e 100%);
+  color: #1a0f0a;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.meBadge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(212, 175, 55, 0.2);
+  color: #d4af37;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tricksValue {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f5f5dc;
+}
+
+.pointsGained {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e57373;
+  animation: pointsPulse 0.5s ease-out;
+}
+
+@keyframes pointsPulse {
+  0% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.noPoints {
+  color: rgba(245, 245, 220, 0.3);
+  font-size: 1rem;
+}
+
+.totalScore {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+.dangerScore {
+  color: #e57373;
+}
+
+.dangerIcon {
+  font-size: 0.85rem;
+  animation: dangerPulse 1s ease-in-out infinite;
+}
+
+@keyframes dangerPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.maxScore {
+  font-size: 0.8rem;
+  color: rgba(245, 245, 220, 0.4);
+  font-weight: 400;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.75rem;
+  color: rgba(245, 245, 220, 0.5);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Footer / Countdown */
+.footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.countdownContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.countdownRing {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.countdownSvg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.countdownProgress {
+  transition: stroke-dashoffset 1s linear;
+}
+
+.countdownNumber {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #d4af37;
+}
+
+.countdownText {
+  font-size: 0.85rem;
+  color: rgba(245, 245, 220, 0.6);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .resultCard {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+  }
+
+  .bonakenBanner {
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 1fr 60px 60px 80px;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tableHeader {
+    font-size: 0.7rem;
+  }
+
+  .legend {
+    gap: 1rem;
+    font-size: 0.7rem;
+  }
+}
