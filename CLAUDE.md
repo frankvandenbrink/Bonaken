@@ -42,7 +42,7 @@ After completing each phase:
 - [x] Fase 2: Lobby System
 - [x] Fase 3: Card System
 - [x] Fase 4: Bonaken Phase
-- [ ] Fase 5: Trump Selection
+- [x] Fase 5: Trump Selection
 - [ ] Fase 6: Trick-Taking
 - [ ] Fase 7: Scoring
 - [ ] Fase 8: Game End/Rematch

@@ -187,36 +187,40 @@ Na elke fase:
 
 ---
 
-## Fase 5: Troef Selectie
+## Fase 5: Troef Selectie [VOLTOOID]
 
 **Doel:** Bonaker of deler kiest troefkleur
 
 ### Server
-- [ ] `src/game/trump.ts`:
-  - [ ] `getTrumpSelector()` - Return bonaker of deler ID
-- [ ] `src/socket/trumpHandlers.ts`:
-  - [ ] `trump-selection-start` emit met selector ID
-  - [ ] `select-trump` event handler
-  - [ ] `trump-selected` emit naar alle spelers
-  - [ ] Validatie: alleen selector mag kiezen
+- [x] `src/socket/trumpHandlers.ts`:
+  - [x] `getTrumpSelector()` - Return bonaker of deler ID
+  - [x] `select-trump` event handler
+  - [x] `trump-selected` emit naar alle spelers
+  - [x] Validatie: alleen selector mag kiezen
+  - [x] Automatische transitie naar speelfase
+  - [x] Slapende kaarten naar bonaker
 
 ### Client
-- [ ] `src/components/TrumpSelection.tsx`:
-  - [ ] Vier kleur iconen (harten, ruiten, klaveren, schoppen)
-  - [ ] Alleen klikbaar voor selector
-  - [ ] Wacht staat voor niet-selectors
-  - [ ] Animatie bij selectie
-- [ ] `src/components/TrumpIndicator.tsx`:
+- [x] `src/components/TrumpSelection.tsx`:
+  - [x] Vier kleur iconen (harten, ruiten, klaveren, schoppen)
+  - [x] Alleen klikbaar voor selector
+  - [x] Wacht staat voor niet-selectors ("Host kiest de troef...")
+  - [x] Celebration animatie bij selectie
+- [x] `src/components/TrumpSelection.module.css`:
+  - [x] Luxe casino esthetiek met glow effects
+  - [x] Rood/zwart kleuren voor suits
+  - [x] Animaties: slideUp, suitReveal, crownPulse, radiateOut
+- [ ] `src/components/TrumpIndicator.tsx`: (TODO in Fase 6)
   - [ ] Altijd zichtbare troef indicator
   - [ ] Duidelijk icoon + kleur
 
 ### Test Criteria
-- [ ] Na bonaken fase start troef selectie
-- [ ] Als iemand bonaakt: bonaker selecteert
-- [ ] Als niemand bonaakt: deler selecteert
-- [ ] Niet-selectors kunnen niet klikken
-- [ ] Na selectie ziet iedereen de troef
-- [ ] Troef indicator blijft zichtbaar tijdens spel
+- [x] Na bonaken fase start troef selectie
+- [x] Als iemand bonaakt: bonaker selecteert
+- [x] Als niemand bonaakt: deler selecteert
+- [x] Niet-selectors kunnen niet klikken
+- [x] Na selectie ziet iedereen de troef
+- [ ] Troef indicator blijft zichtbaar tijdens spel (TODO in Fase 6)
 
 ---
 
