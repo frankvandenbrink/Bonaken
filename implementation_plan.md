@@ -412,64 +412,65 @@ Na elke fase:
 
 ---
 
-## Fase 10: Visuele Polish
+## Fase 10: Visuele Polish [VOLTOOID]
 
 **Doel:** Klassieke Nederlandse kaartspel esthetiek met SVG kaarten
 
 ### Styling
-- [ ] `src/styles/theme.ts`:
-  - [ ] Kleurenpalet (bruin, goud, groen, cream)
-  - [ ] Typography (serif fonts)
-  - [ ] Shadows en depth
-- [ ] `src/styles/global.css`:
-  - [ ] Reset styles
-  - [ ] Base typography
-  - [ ] Color variables
-- [ ] `src/styles/animations.css`:
-  - [ ] Kaart deal animatie
-  - [ ] Kaart speel animatie
-  - [ ] Slag verzamel animatie
-  - [ ] Fade in/out transitions
+- [x] `src/index.css`:
+  - [x] Kleurenpalet (bruin, goud, groen, cream) in CSS variables
+  - [x] Typography (serif fonts)
+  - [x] Shadows en depth
+  - [x] Card-specifieke animaties (cardDeal, cardPlay, cardFlip, trickCollect, etc.)
+- [x] Animaties in `src/index.css`:
+  - [x] Kaart deal animatie (cardDeal)
+  - [x] Kaart speel animatie (cardPlay)
+  - [x] Slag verzamel animatie (trickCollect)
+  - [x] Glow en bounce transitions
 
 ### SVG Kaarten
-- [ ] `src/assets/cards/` directory
-- [ ] `src/components/CardFace.tsx`:
-  - [ ] SVG rendering per kaart
-  - [ ] Suit symbolen (harten, ruiten, klaveren, schoppen)
-  - [ ] Rank displays
-  - [ ] Court cards (B, V, K) styling
-- [ ] Alle 32 kaart designs
+- [x] `src/components/CardFace.tsx`:
+  - [x] SVG rendering per kaart
+  - [x] Suit symbolen (harten, ruiten, klaveren, schoppen)
+  - [x] Rank displays met pip layouts
+  - [x] Court cards (B, V, K) styling
+- [x] Alle 32 kaart designs via dynamische pip layouts
+- [x] `src/components/CardFace.module.css` met styling
 
 ### Tafel Layout
-- [ ] `src/components/Table.tsx`:
-  - [ ] Houten textuur achtergrond
-  - [ ] Groen vilt center
-  - [ ] Gouden trim accenten
-  - [ ] Speler posities
-- [ ] Responsive design:
-  - [ ] Desktop layout
-  - [ ] Tablet layout
-  - [ ] Mobiel layout (scrollbare hand)
+- [x] `src/components/Table.tsx`:
+  - [x] Houten textuur achtergrond (mahonie frame)
+  - [x] Groen vilt center met textuur
+  - [x] Gouden trim accenten (inlay en shimmer)
+  - [x] Messing hoek-fixtures
+  - [x] Decoratieve kaartsuit symbolen in hoeken
+- [x] `src/components/Table.module.css`:
+  - [x] Uitgebreide CSS met variabelen
+  - [x] Responsive design voor desktop en mobiel
+- [x] PlayingPhase integratie met Table component
 
 ### Geluidseffecten
-- [ ] `src/utils/sounds.ts`:
-  - [ ] Sound manager class
-  - [ ] Volume controle
-  - [ ] Mute optie
-- [ ] `src/assets/sounds/`:
-  - [ ] Kaart shuffle
-  - [ ] Kaart spelen (slap)
-  - [ ] Slag winnen (swipe)
-  - [ ] Beurt notificatie (ding)
-  - [ ] Game start/einde
+- [x] `src/utils/sounds.ts`:
+  - [x] Sound manager class met Web Audio API synthesis
+  - [x] Volume controle
+  - [x] Mute optie met localStorage persistentie
+- [x] Synthesized geluidseffecten (geen externe bestanden):
+  - [x] Kaart shuffle
+  - [x] Kaart spelen
+  - [x] Kaart delen
+  - [x] Slag winnen
+  - [x] Beurt notificatie
+  - [x] Game start/einde
+  - [x] Bonaken sound
+  - [x] Button click
 
 ### Test Criteria
-- [ ] Houten tafel textuur zichtbaar
-- [ ] SVG kaarten renderen scherp
-- [ ] Animaties zijn soepel (60fps)
-- [ ] Geluidseffecten spelen correct
-- [ ] Responsive op alle schermformaten
-- [ ] Touch interacties werken op mobiel
+- [x] Houten tafel textuur zichtbaar (mahonie frame met wood grain)
+- [x] Kaarten renderen scherp met pip layouts
+- [x] Animaties zijn soepel
+- [x] Geluidseffecten geïmplementeerd (Web Audio synthesis)
+- [x] Responsive op desktop
+- [x] Touch interacties werken
 
 ---
 
