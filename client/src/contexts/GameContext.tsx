@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useSocket } from '../hooks/useSocket';
-import type { GameState, Player, GameSettings } from '@shared/index';
+import type { GameState, Player, GameSettings, Card, Suit } from '@shared/index';
 
 interface GameContextType {
   // Connection
@@ -17,6 +17,8 @@ interface GameContextType {
   gamePhase: GameState['phase'] | null;
   players: Player[];
   settings: GameSettings;
+  hand: Card[];
+  trump: Suit | null;
 
   // Error handling
   error: string | null;
@@ -51,6 +53,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [gamePhase, setGamePhase] = useState<GameState['phase'] | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [settings, setSettings] = useState<GameSettings>(defaultSettings);
+  const [hand, setHand] = useState<Card[]>([]);
+  const [trump, setTrump] = useState<Suit | null>(null);
 
   // Error state
   const [error, setError] = useState<string | null>(null);
@@ -98,6 +102,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       on('game-starting', () => {
         setGamePhase('dealing');
+      }),
+
+      on('cards-dealt', ({ hand: dealtHand }) => {
+        setHand(dealtHand);
+        console.log(`Received ${dealtHand.length} cards`);
+      }),
+
+      on('bonaken-phase-start', () => {
+        setGamePhase('bonaken');
+      }),
+
+      on('trump-selected', ({ trump: selectedTrump }) => {
+        setTrump(selectedTrump);
       }),
 
       on('error', ({ message }) => {
@@ -166,6 +183,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       gamePhase,
       players,
       settings,
+      hand,
+      trump,
       error,
       clearError,
       createGame,

@@ -1,0 +1,146 @@
+/* Hand.module.css - Card fan layout with Dutch cafe warmth */
+
+.hand {
+  width: 100%;
+  padding: var(--space-md);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 140px;
+}
+
+.cardContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  position: relative;
+  padding: 0 var(--space-lg);
+}
+
+/* Individual card wrapper for positioning */
+.cardWrapper {
+  margin-left: -25px;
+  transition:
+    transform 0.2s ease,
+    margin 0.2s ease;
+}
+
+/* First card has no negative margin */
+.cardWrapper:first-child {
+  margin-left: 0;
+}
+
+/* Valid cards are slightly raised */
+.valid {
+  transform: translateY(-6px);
+}
+
+/* Stagger cards slightly for depth perception */
+.cardWrapper:nth-child(odd) {
+  transform: translateY(calc(-6px * var(--is-valid, 0)));
+}
+
+/* Empty state */
+.empty {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--cream);
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: var(--space-xl);
+}
+
+/* Hover effect - spread cards slightly */
+.cardContainer:hover .cardWrapper {
+  margin-left: -20px;
+}
+
+.cardContainer:hover .cardWrapper:first-child {
+  margin-left: 0;
+}
+
+/* Animation for cards being dealt */
+@keyframes dealCard {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) rotate(-10deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+
+.cardWrapper {
+  animation: dealCard 0.4s ease-out backwards;
+  animation-delay: calc(var(--card-index, 0) * 0.08s);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .hand {
+    padding: var(--space-sm);
+    min-height: 120px;
+  }
+
+  .cardContainer {
+    padding: 0 var(--space-sm);
+  }
+
+  .cardWrapper {
+    margin-left: -30px;
+  }
+
+  .cardContainer:hover .cardWrapper {
+    margin-left: -28px;
+  }
+}
+
+@media (min-width: 768px) {
+  .hand {
+    min-height: 160px;
+    padding: var(--space-lg);
+  }
+
+  .cardWrapper {
+    margin-left: -22px;
+  }
+
+  .cardContainer:hover .cardWrapper {
+    margin-left: -15px;
+  }
+
+  .valid {
+    transform: translateY(-10px);
+  }
+}
+
+/* Large screens - more spacing */
+@media (min-width: 1024px) {
+  .cardWrapper {
+    margin-left: -18px;
+  }
+
+  .cardContainer:hover .cardWrapper {
+    margin-left: -10px;
+  }
+}
+
+/* Trump indicator - could add visual indicator for trump suit cards */
+.trumpCard {
+  position: relative;
+}
+
+.trumpCard::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--gold);
+}

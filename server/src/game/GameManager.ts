@@ -1,5 +1,6 @@
-import type { GameState, Player, GameSettings, GamePhase } from '../../../shared/src/index';
+import type { GameState, Player, GameSettings, GamePhase, Card } from '../../../shared/src/index';
 import { generateGameCode } from '../utils/codeGenerator';
+import { dealCards, getCardDistribution } from './dealing';
 
 export class GameManager {
   private games: Map<string, GameState> = new Map();
@@ -34,7 +35,8 @@ export class GameManager {
       bonakenChoices: [],
       currentTrick: [],
       roundNumber: 0,
-      lastActivity: Date.now()
+      lastActivity: Date.now(),
+      sleepingCards: []
     };
 
     this.games.set(code, game);
@@ -126,13 +128,38 @@ export class GameManager {
     return { canStart: true };
   }
 
-  startGame(code: string): GameState | undefined {
+  startGame(code: string): { game?: GameState; hands?: Map<string, Card[]> } {
     const game = this.games.get(code);
-    if (game) {
-      game.phase = 'dealing';
-      game.lastActivity = Date.now();
+    if (!game) {
+      return {};
     }
-    return game;
+
+    // Deal cards to all players
+    const { hands, sleepingCards } = dealCards(game.players);
+
+    // Assign hands to players
+    for (const player of game.players) {
+      const hand = hands.get(player.id);
+      if (hand) {
+        player.hand = hand;
+      }
+    }
+
+    // Store sleeping cards
+    game.sleepingCards = sleepingCards;
+
+    // Initialize bonaken choices
+    game.bonakenChoices = game.players.map(p => ({
+      playerId: p.id,
+      choice: null
+    }));
+
+    // Move to bonaken phase
+    game.phase = 'bonaken';
+    game.roundNumber = 1;
+    game.lastActivity = Date.now();
+
+    return { game, hands };
   }
 
   removePlayer(playerId: string): { game?: GameState; wasHost: boolean; isEmpty: boolean } {

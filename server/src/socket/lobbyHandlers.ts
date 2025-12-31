@@ -90,11 +90,35 @@ export function setupLobbyHandlers(io: TypedServer, socket: TypedSocket) {
       return;
     }
 
-    const startedGame = gameManager.startGame(game.code);
-    if (startedGame) {
+    const { game: startedGame, hands } = gameManager.startGame(game.code);
+    if (startedGame && hands) {
       console.log(`Spel ${game.code} gestart met ${startedGame.players.length} spelers`);
+
+      // Notify all players game is starting
       io.to(game.code).emit('game-starting');
-      io.to(game.code).emit('game-state', startedGame);
+
+      // Send each player their own hand
+      for (const player of startedGame.players) {
+        const playerHand = hands.get(player.id);
+        if (playerHand) {
+          io.to(player.id).emit('cards-dealt', { hand: playerHand });
+        }
+      }
+
+      // Send bonaken phase start
+      io.to(game.code).emit('bonaken-phase-start');
+
+      // Create sanitized game state (without other players' hands)
+      const sanitizedGame = {
+        ...startedGame,
+        players: startedGame.players.map(p => ({
+          ...p,
+          hand: [] // Hide other players' hands
+        })),
+        sleepingCards: [] // Hide sleeping cards
+      };
+
+      io.to(game.code).emit('game-state', sanitizedGame);
     }
   });
 

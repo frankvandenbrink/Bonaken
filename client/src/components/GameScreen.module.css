@@ -1,0 +1,227 @@
+/* GameScreen.module.css - Main game layout */
+
+.gameScreen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background:
+    radial-gradient(ellipse at center, rgba(46, 125, 50, 0.15) 0%, transparent 60%),
+    var(--wood-dark);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.gameInfo {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.gameCode {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+}
+
+.phase {
+  font-size: 0.85rem;
+  color: var(--cream);
+  opacity: 0.8;
+  text-transform: capitalize;
+}
+
+.playerInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.nickname {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--cream);
+}
+
+.hostBadge {
+  background: var(--gold);
+  color: var(--wood-dark);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Main game area */
+.gameArea {
+  flex: 1;
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  overflow: hidden;
+}
+
+/* Player list sidebar */
+.playerList {
+  width: 200px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: var(--border-radius);
+  padding: var(--space-md);
+}
+
+.playerList h3 {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--gold);
+  margin-bottom: var(--space-md);
+  letter-spacing: 0.05em;
+}
+
+.playerList ul {
+  list-style: none;
+}
+
+.playerList li {
+  padding: var(--space-sm) 0;
+  color: var(--cream);
+  font-size: 0.95rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.playerList li:last-child {
+  border-bottom: none;
+}
+
+.currentPlayer {
+  color: var(--gold) !important;
+  font-weight: 500;
+}
+
+/* Center area */
+.centerArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Bonaken phase */
+.bonakenPhase {
+  animation: fadeIn 0.5s ease;
+}
+
+.bonakenPhase h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--gold);
+  margin-bottom: var(--space-md);
+}
+
+.bonakenPhase p {
+  color: var(--cream);
+  opacity: 0.9;
+  margin-bottom: var(--space-sm);
+}
+
+.cardCount {
+  font-size: 1.1rem;
+  color: var(--gold-light) !important;
+  opacity: 1 !important;
+}
+
+.trump {
+  margin-top: var(--space-md);
+  font-size: 1.2rem;
+  color: var(--felt-green-light) !important;
+}
+
+/* Dealing animation */
+.dealing {
+  animation: fadeIn 0.5s ease;
+}
+
+.dealing h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--gold);
+  margin-bottom: var(--space-lg);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(212, 175, 55, 0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hand area at bottom */
+.handArea {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  border-top: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .gameArea {
+    flex-direction: column;
+    padding: var(--space-md);
+  }
+
+  .playerList {
+    width: 100%;
+    order: 2;
+  }
+
+  .playerList ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .playerList li {
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    border-bottom: none;
+  }
+
+  .centerArea {
+    order: 1;
+    padding: var(--space-md) 0;
+  }
+
+  .bonakenPhase h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

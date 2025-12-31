@@ -1,5 +1,8 @@
 // Bonaken Shared Types
 
+// Re-export card utilities
+export * from './cardUtils';
+
 // Kaart types
 export type Suit = 'harten' | 'ruiten' | 'klaveren' | 'schoppen';
 export type Rank = '7' | '8' | '9' | '10' | 'B' | 'V' | 'K' | 'A';
@@ -63,6 +66,7 @@ export interface GameState {
   currentTrick: PlayedCard[];
   roundNumber: number;
   lastActivity: number;
+  sleepingCards: Card[]; // Slapende kaarten (voor bonaker)
 }
 
 // Socket event types

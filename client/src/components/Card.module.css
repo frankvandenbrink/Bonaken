@@ -1,0 +1,203 @@
+/* Card.module.css - Dutch cafe playing card aesthetic */
+
+.card {
+  position: relative;
+  width: 60px;
+  height: 90px;
+  background: linear-gradient(
+    145deg,
+    #faf8f0 0%,
+    #f5f5dc 50%,
+    #ede9d5 100%
+  );
+  border: 2px solid #c9b896;
+  border-radius: 6px;
+  padding: 0;
+  cursor: default;
+  font-family: 'Crimson Pro', Georgia, serif;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  /* Subtle card edge effect */
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Red suits - harten & ruiten */
+.red {
+  color: #b22222;
+}
+
+/* Black suits - klaveren & schoppen */
+.black {
+  color: #1a1a1a;
+}
+
+/* Playable state */
+.playable {
+  cursor: pointer;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(212, 175, 55, 0.3);
+}
+
+.playable:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 12px 24px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(212, 175, 55, 0.4);
+  border-color: var(--gold);
+  z-index: 10;
+}
+
+.playable:active {
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Selected state */
+.selected {
+  border-color: var(--gold);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 8px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 3px var(--gold),
+    0 0 30px rgba(212, 175, 55, 0.5);
+  transform: translateY(-12px);
+}
+
+/* Disabled state (not playable) */
+.card:disabled:not(.playable) {
+  opacity: 0.7;
+  filter: brightness(0.9);
+}
+
+/* Corner elements */
+.corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  top: 4px;
+  left: 5px;
+}
+
+.bottomRight {
+  top: auto;
+  left: auto;
+  bottom: 4px;
+  right: 5px;
+  transform: rotate(180deg);
+}
+
+.rank {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.suit {
+  font-size: 12px;
+  margin-top: -2px;
+}
+
+/* Center suit symbol */
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.centerSuit {
+  font-size: 28px;
+  opacity: 0.9;
+}
+
+/* Card texture overlay for parchment effect */
+.texture {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+}
+
+/* Card back (for face-down cards) */
+.cardBack {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      #2c1810 0px,
+      #2c1810 2px,
+      #3d2517 2px,
+      #3d2517 4px
+    );
+  border-color: var(--gold-dark);
+}
+
+.cardBack::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background: var(--wood-dark);
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+}
+
+/* Responsive sizing */
+@media (min-width: 480px) {
+  .card {
+    width: 70px;
+    height: 105px;
+  }
+
+  .rank {
+    font-size: 16px;
+  }
+
+  .suit {
+    font-size: 14px;
+  }
+
+  .centerSuit {
+    font-size: 32px;
+  }
+}
+
+@media (min-width: 768px) {
+  .card {
+    width: 80px;
+    height: 120px;
+  }
+
+  .corner {
+    top: 6px;
+    left: 7px;
+  }
+
+  .bottomRight {
+    bottom: 6px;
+    right: 7px;
+  }
+
+  .rank {
+    font-size: 18px;
+  }
+
+  .suit {
+    font-size: 16px;
+  }
+
+  .centerSuit {
+    font-size: 40px;
+  }
+}

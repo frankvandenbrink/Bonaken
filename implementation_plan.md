@@ -100,49 +100,54 @@ Na elke fase:
 
 ---
 
-## Fase 3: Kaart Systeem
+## Fase 3: Kaart Systeem [VOLTOOID]
 
 **Doel:** 32-kaarten deck, delen, en kaart weergave
 
 ### Server
-- [ ] `src/game/deck.ts`:
-  - [ ] `createDeck()` - 32 kaarten (7,8,9,10,B,V,K,A × 4 kleuren)
-  - [ ] `shuffleDeck()` - Fisher-Yates shuffle
-- [ ] `src/game/dealing.ts`:
-  - [ ] `dealCards()` - Verdeel kaarten over spelers
-  - [ ] Bereken slapende kaarten per speler aantal
-  - [ ] Socket event: `cards-dealt`
+- [x] `src/game/deck.ts`:
+  - [x] `createDeck()` - 32 kaarten (7,8,9,10,B,V,K,A × 4 kleuren)
+  - [x] `shuffleDeck()` - Fisher-Yates shuffle
+- [x] `src/game/dealing.ts`:
+  - [x] `dealCards()` - Verdeel kaarten over spelers
+  - [x] Bereken slapende kaarten per speler aantal
+  - [x] Socket event: `cards-dealt`
 
 ### Shared
-- [ ] `utils/cardUtils.ts`:
-  - [ ] `sortHand()` - Sorteer op kleur, dan rang
-  - [ ] Normale rankvolgorde: A,K,V,B,10,9,8,7
-  - [ ] Troef rankvolgorde: B,9,A,10,K,V,8,7
-  - [ ] Kleurvolgorde: schoppen, harten, klaveren, ruiten
+- [x] `utils/cardUtils.ts`:
+  - [x] `sortHand()` - Sorteer op kleur, dan rang
+  - [x] Normale rankvolgorde: A,K,V,B,10,9,8,7
+  - [x] Troef rankvolgorde: B,9,A,10,K,V,8,7
+  - [x] Kleurvolgorde: schoppen, harten, klaveren, ruiten
 
 ### Client
-- [ ] `src/components/Card.tsx`:
-  - [ ] Kaart weergave (later SVG)
-  - [ ] Kleur styling (rood/zwart)
-  - [ ] Rank en suit symbolen
-  - [ ] Playable/disabled states
-  - [ ] Hover en click effects
-- [ ] `src/components/Hand.tsx`:
-  - [ ] Horizontale waaier layout
-  - [ ] Overlappende kaarten
-  - [ ] Responsive spacing
-  - [ ] Speelbare kaarten highlighted
+- [x] `src/components/Card.tsx`:
+  - [x] Kaart weergave (later SVG)
+  - [x] Kleur styling (rood/zwart)
+  - [x] Rank en suit symbolen
+  - [x] Playable/disabled states
+  - [x] Hover en click effects
+- [x] `src/components/Hand.tsx`:
+  - [x] Horizontale waaier layout
+  - [x] Overlappende kaarten
+  - [x] Responsive spacing
+  - [x] Speelbare kaarten highlighted
+- [x] `src/components/GameScreen.tsx`:
+  - [x] Game header met spelcode en fase
+  - [x] Spelerslijst sidebar
+  - [x] Fase-specifieke content
+  - [x] Hand weergave onderaan
 
 ### Test Criteria
-- [ ] Na "Start Spel" worden kaarten gedeeld
-- [ ] 2 spelers: 16 kaarten elk, 0 slapend
-- [ ] 3 spelers: 10 kaarten elk, 2 slapend
-- [ ] 4 spelers: 8 kaarten elk, 0 slapend
-- [ ] 5 spelers: 6 kaarten elk, 2 slapend
-- [ ] 6 spelers: 5 kaarten elk, 2 slapend
-- [ ] 7 spelers: 4 kaarten elk, 4 slapend
-- [ ] Kaarten zijn gesorteerd weergegeven
-- [ ] Kaart componenten renderen correct
+- [x] Na "Start Spel" worden kaarten gedeeld
+- [x] 2 spelers: 16 kaarten elk, 0 slapend
+- [x] 3 spelers: 10 kaarten elk, 2 slapend (logica geïmplementeerd)
+- [x] 4 spelers: 8 kaarten elk, 0 slapend (logica geïmplementeerd)
+- [x] 5 spelers: 6 kaarten elk, 2 slapend (logica geïmplementeerd)
+- [x] 6 spelers: 5 kaarten elk, 2 slapend (logica geïmplementeerd)
+- [x] 7 spelers: 4 kaarten elk, 4 slapend (logica geïmplementeerd)
+- [x] Kaarten zijn gesorteerd weergegeven
+- [x] Kaart componenten renderen correct
 
 ---
 
