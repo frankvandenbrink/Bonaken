@@ -1,0 +1,171 @@
+/* CardFace.module.css - Victorian Elegance Playing Card Styling */
+
+.cardFace {
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  transition: filter 0.2s ease;
+}
+
+.cardFace:hover {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+}
+
+/* Size variants */
+.small {
+  width: 50px;
+  height: 70px;
+}
+
+.medium {
+  width: 70px;
+  height: 98px;
+}
+
+.large {
+  width: 100px;
+  height: 140px;
+}
+
+/* Color variants */
+.redCard {
+  --card-color: #b22222;
+  --card-accent: #8b0000;
+}
+
+.blackCard {
+  --card-color: #1a1a1a;
+  --card-accent: #2a2a2a;
+}
+
+.red {
+  color: #b22222;
+  fill: #b22222;
+}
+
+.black {
+  color: #1a1a1a;
+  fill: #1a1a1a;
+}
+
+/* Corner text styling */
+.corner {
+  font-family: 'Crimson Pro', Georgia, serif;
+}
+
+.rankText {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.suitText {
+  font-size: 12px;
+}
+
+/* Center content */
+.centerContent {
+  opacity: 1;
+}
+
+/* Pip animations */
+.pip {
+  animation: pipAppear 0.3s ease-out both;
+}
+
+@keyframes pipAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Court card figure styling */
+.courtFigure {
+  animation: courtReveal 0.4s ease-out both;
+}
+
+@keyframes courtReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ace suit styling */
+.aceSuit {
+  animation: aceReveal 0.5s ease-out both;
+}
+
+@keyframes aceReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) rotate(-10deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (min-width: 480px) {
+  .small {
+    width: 55px;
+    height: 77px;
+  }
+
+  .medium {
+    width: 80px;
+    height: 112px;
+  }
+
+  .large {
+    width: 120px;
+    height: 168px;
+  }
+
+  .rankText {
+    font-size: 15px;
+  }
+
+  .suitText {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 768px) {
+  .small {
+    width: 60px;
+    height: 84px;
+  }
+
+  .medium {
+    width: 90px;
+    height: 126px;
+  }
+
+  .large {
+    width: 140px;
+    height: 196px;
+  }
+
+  .rankText {
+    font-size: 16px;
+  }
+
+  .suitText {
+    font-size: 14px;
+  }
+}

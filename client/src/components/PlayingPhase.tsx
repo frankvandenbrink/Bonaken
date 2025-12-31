@@ -1,5 +1,6 @@
 import { useGame } from '../contexts/GameContext';
 import type { Suit } from '@shared/index';
+import { Table } from './Table';
 import styles from './PlayingPhase.module.css';
 
 const SUIT_SYMBOLS: Record<Suit, string> = {
@@ -98,45 +99,43 @@ export function PlayingPhase() {
         </div>
       </div>
 
-      {/* Center: Trick Area */}
+      {/* Center: Trick Area with Immersive Table */}
       <div className={styles.trickArea}>
-        <div className={styles.tableCloth}>
-          <div className={styles.tableInner}>
-            {/* Played cards */}
-            {currentTrick.length > 0 ? (
-              <div className={styles.playedCards}>
-                {currentTrick.map((playedCard, index) => {
-                  const player = players.find(p => p.id === playedCard.playerId);
-                  const playerIndex = players.findIndex(p => p.id === playedCard.playerId);
-                  const isWinner = playedCard.playerId === trickWinner;
-                  const isRed = playedCard.card.suit === 'harten' || playedCard.card.suit === 'ruiten';
+        <Table playerCount={players.length} showOrnaments={true}>
+          {/* Played cards */}
+          {currentTrick.length > 0 ? (
+            <div className={styles.playedCards}>
+              {currentTrick.map((playedCard, index) => {
+                const player = players.find(p => p.id === playedCard.playerId);
+                const playerIndex = players.findIndex(p => p.id === playedCard.playerId);
+                const isWinner = playedCard.playerId === trickWinner;
+                const isRed = playedCard.card.suit === 'harten' || playedCard.card.suit === 'ruiten';
 
-                  return (
-                    <div
-                      key={playedCard.card.id}
-                      className={`${styles.playedCard} ${isWinner ? styles.winningCard : ''}`}
-                      style={{
-                        ...getCardPosition(playerIndex, players.length),
-                        animationDelay: `${index * 0.1}s`
-                      }}
-                    >
-                      <div className={`${styles.cardFace} ${isRed ? styles.red : styles.black}`}>
-                        <span className={styles.cardRank}>{playedCard.card.rank}</span>
-                        <span className={styles.cardSuit}>{SUIT_SYMBOLS[playedCard.card.suit]}</span>
-                      </div>
-                      <span className={styles.cardPlayer}>{player?.nickname}</span>
+                return (
+                  <div
+                    key={playedCard.card.id}
+                    className={`${styles.playedCard} ${isWinner ? styles.winningCard : ''}`}
+                    style={{
+                      ...getCardPosition(playerIndex, players.length),
+                      animationDelay: `${index * 0.1}s`
+                    }}
+                  >
+                    <div className={`${styles.cardFace} ${isRed ? styles.red : styles.black}`}>
+                      <span className={styles.cardRank}>{playedCard.card.rank}</span>
+                      <span className={styles.cardSuit}>{SUIT_SYMBOLS[playedCard.card.suit]}</span>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className={styles.emptyTrick}>
-                <span className={styles.emptyIcon}>♠♥♦♣</span>
-                <span className={styles.emptyText}>Wachten op eerste kaart...</span>
-              </div>
-            )}
-          </div>
-        </div>
+                    <span className={styles.cardPlayer}>{player?.nickname}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className={styles.emptyTrick}>
+              <span className={styles.emptyIcon}>♠♥♦♣</span>
+              <span className={styles.emptyText}>Wachten op eerste kaart...</span>
+            </div>
+          )}
+        </Table>
       </div>
 
       {/* Bottom: Player scores */}

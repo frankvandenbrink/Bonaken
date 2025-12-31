@@ -231,50 +231,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-md);
+  padding: var(--space-sm);
+  min-height: 300px;
 }
 
-.tableCloth {
-  position: relative;
-  width: 100%;
-  max-width: 500px;
-  aspect-ratio: 1;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(30, 60, 30, 0.4) 0%,
-    rgba(20, 40, 20, 0.6) 50%,
-    rgba(10, 20, 10, 0.8) 100%
-  );
-  border-radius: 50%;
-  border: 8px solid var(--wood-dark);
-  box-shadow:
-    inset 0 0 60px rgba(0, 0, 0, 0.5),
-    0 10px 40px rgba(0, 0, 0, 0.4),
-    0 0 0 2px var(--gold);
-}
-
-.tableCloth::before {
-  content: '';
-  position: absolute;
-  inset: 20px;
-  border: 2px solid rgba(212, 175, 55, 0.15);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.tableInner {
+/* Played Cards */
+.playedCards {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* Played Cards */
-.playedCards {
-  position: relative;
-  width: 100%;
-  height: 100%;
 }
 
 .playedCard {
@@ -470,8 +437,8 @@
     gap: var(--space-sm);
   }
 
-  .tableCloth {
-    max-width: 300px;
+  .trickArea {
+    min-height: 250px;
   }
 
   .cardFace {
