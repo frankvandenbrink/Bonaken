@@ -26,6 +26,9 @@ npm-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+shared/src/*.js
+shared/src/*.d.ts
+shared/src/*.d.ts.map
 
 # Vite
 .vite/
