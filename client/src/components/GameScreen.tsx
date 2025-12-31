@@ -2,13 +2,25 @@ import { useGame } from '../contexts/GameContext';
 import { Hand } from './Hand';
 import { BonakenPhase } from './BonakenPhase';
 import { TrumpSelection } from './TrumpSelection';
+import { PlayingPhase } from './PlayingPhase';
 import styles from './GameScreen.module.css';
 
 /**
  * Main game screen - shows current game phase and player's hand
  */
 export function GameScreen() {
-  const { gameCode, gamePhase, players, hand, trump, playerId, nickname, trumpSelector } = useGame();
+  const {
+    gameCode,
+    gamePhase,
+    players,
+    hand,
+    trump,
+    playerId,
+    nickname,
+    currentTurn,
+    validCardIds,
+    playCard
+  } = useGame();
 
   // Get current player's info
   const currentPlayer = players.find(p => p.id === playerId);
@@ -49,6 +61,8 @@ export function GameScreen() {
 
           {gamePhase === 'trump-selection' && <TrumpSelection />}
 
+          {gamePhase === 'playing' && <PlayingPhase />}
+
           {gamePhase === 'dealing' && (
             <div className={styles.dealing}>
               <h2>Kaarten worden gedeeld...</h2>
@@ -63,8 +77,8 @@ export function GameScreen() {
         <Hand
           cards={hand}
           trump={trump}
-          validCardIds={[]} // No cards playable during bonaken phase
-          onCardClick={(cardId) => console.log('Clicked:', cardId)}
+          validCardIds={gamePhase === 'playing' && currentTurn === playerId ? validCardIds : []}
+          onCardClick={gamePhase === 'playing' && currentTurn === playerId ? playCard : undefined}
         />
       </footer>
     </div>

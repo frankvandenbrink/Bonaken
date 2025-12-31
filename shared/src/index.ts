@@ -84,7 +84,7 @@ export interface ServerToClientEvents {
   'trump-selected': (data: { trump: Suit }) => void;
   'turn-start': (data: { playerId: string; validCardIds: string[] }) => void;
   'card-played': (data: { playerId: string; card: Card }) => void;
-  'trick-complete': (data: { winnerId: string }) => void;
+  'trick-complete': (data: { winnerId: string; tricksWon: Record<string, number> }) => void;
   'trick-cleared': () => void;
   'round-scores': (data: { scores: Record<string, number>; bonakenSucceeded: boolean | null }) => void;
   'game-scores': (data: { scores: Record<string, number> }) => void;

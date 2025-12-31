@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import type { ServerToClientEvents, ClientToServerEvents, Suit } from '../../../shared/src/index';
 import { gameManager } from '../game/GameManager';
+import { startPlayerTurn } from './gameplayHandlers';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -82,15 +83,10 @@ export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
       const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
       const firstPlayer = game.players[firstPlayerIndex];
 
-      game.currentTurn = firstPlayer.id;
-
       console.log(`Spel start! Eerste speler: ${firstPlayer.nickname}`);
 
-      // TODO: In Fase 6 - emit turn-start met valid cards
-      // io.to(game.code).emit('turn-start', {
-      //   playerId: firstPlayer.id,
-      //   validCardIds: getValidCards(firstPlayer.hand, game.currentTrick, game.trump)
-      // });
+      // Start eerste beurt
+      startPlayerTurn(io, game, firstPlayer.id);
     }, 1500); // 1.5 seconden om troef te zien
 
     game.lastActivity = Date.now();

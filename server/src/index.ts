@@ -9,6 +9,7 @@ import type {
 import { setupLobbyHandlers } from './socket/lobbyHandlers';
 import { setupBonakenHandlers } from './socket/bonakenHandlers';
 import { setupTrumpHandlers } from './socket/trumpHandlers';
+import { setupGameplayHandlers } from './socket/gameplayHandlers';
 import { gameManager } from './game/GameManager';
 
 const app = express();
@@ -34,6 +35,7 @@ io.on('connection', (socket) => {
   setupLobbyHandlers(io, socket);
   setupBonakenHandlers(io, socket);
   setupTrumpHandlers(io, socket);
+  setupGameplayHandlers(io, socket);
 });
 
 // Cleanup inactieve games elke minuut

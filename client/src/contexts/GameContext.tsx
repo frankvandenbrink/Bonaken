@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useSocket } from '../hooks/useSocket';
-import type { GameState, Player, GameSettings, Card, Suit, BonakChoice } from '@shared/index';
+import type { GameState, Player, GameSettings, Card, Suit, BonakChoice, PlayedCard } from '@shared/index';
 
 interface GameContextType {
   // Connection
@@ -27,6 +27,15 @@ interface GameContextType {
   hasChosen: boolean;
   trumpSelector: string | null;
 
+  // Playing state
+  currentTurn: string | null;
+  currentTrick: PlayedCard[];
+  validCardIds: string[];
+  trickWinner: string | null;
+  roundScores: Record<string, number> | null;
+  gameScores: Record<string, number>;
+  bonakenSucceeded: boolean | null;
+
   // Error handling
   error: string | null;
   clearError: () => void;
@@ -39,6 +48,7 @@ interface GameContextType {
   leaveGame: () => void;
   makeBonakChoice: (choice: 'bonaken' | 'passen') => void;
   selectTrump: (suit: Suit) => void;
+  playCard: (cardId: string) => void;
 }
 
 const defaultSettings: GameSettings = {
@@ -70,6 +80,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [bonaker, setBonaker] = useState<string | null>(null);
   const [chosenCount, setChosenCount] = useState(0);
   const [trumpSelector, setTrumpSelector] = useState<string | null>(null);
+
+  // Playing state
+  const [currentTurn, setCurrentTurn] = useState<string | null>(null);
+  const [currentTrick, setCurrentTrick] = useState<PlayedCard[]>([]);
+  const [validCardIds, setValidCardIds] = useState<string[]>([]);
+  const [trickWinner, setTrickWinner] = useState<string | null>(null);
+  const [roundScores, setRoundScores] = useState<Record<string, number> | null>(null);
+  const [gameScores, setGameScores] = useState<Record<string, number>>({});
+  const [bonakenSucceeded, setBonakenSucceeded] = useState<boolean | null>(null);
 
   // Error state
   const [error, setError] = useState<string | null>(null);
@@ -172,6 +191,54 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setTrump(selectedTrump);
       }),
 
+      on('turn-start', ({ playerId: turnPlayerId, validCardIds: validIds }) => {
+        setGamePhase('playing');
+        setCurrentTurn(turnPlayerId);
+        setValidCardIds(validIds);
+        setTrickWinner(null); // Clear previous trick winner
+        console.log(`Turn started for ${turnPlayerId}, valid cards:`, validIds);
+      }),
+
+      on('card-played', ({ playerId: cardPlayerId, card }) => {
+        setCurrentTrick(prev => [...prev, { playerId: cardPlayerId, card }]);
+        // Remove card from hand if it's our card
+        if (cardPlayerId === socket?.id) {
+          setHand(prev => prev.filter(c => c.id !== card.id));
+        }
+      }),
+
+      on('trick-complete', ({ winnerId, tricksWon }) => {
+        setTrickWinner(winnerId);
+        setCurrentTurn(null);
+        // Update players' tricksWon
+        setPlayers(prev => prev.map(p => ({
+          ...p,
+          tricksWon: tricksWon[p.id] ?? p.tricksWon
+        })));
+        console.log(`Trick complete! Winner: ${winnerId}`, tricksWon);
+      }),
+
+      on('trick-cleared', () => {
+        setCurrentTrick([]);
+        setTrickWinner(null);
+      }),
+
+      on('round-scores', ({ scores, bonakenSucceeded: succeeded }) => {
+        setRoundScores(scores);
+        setBonakenSucceeded(succeeded);
+        setGamePhase('round-end');
+      }),
+
+      on('game-scores', ({ scores }) => {
+        setGameScores(scores);
+      }),
+
+      on('game-ended', ({ loserId, finalScores }) => {
+        setGamePhase('game-end');
+        setGameScores(finalScores);
+        console.log(`Game ended! Loser: ${loserId}`);
+      }),
+
       on('error', ({ message }) => {
         setError(message);
       })
@@ -231,6 +298,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     emit('select-trump', { suit });
   }, [emit]);
 
+  const playCard = useCallback((cardId: string) => {
+    emit('play-card', { cardId });
+  }, [emit]);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -253,6 +324,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
       chosenCount,
       hasChosen,
       trumpSelector,
+      currentTurn,
+      currentTrick,
+      validCardIds,
+      trickWinner,
+      roundScores,
+      gameScores,
+      bonakenSucceeded,
       error,
       clearError,
       createGame,
@@ -261,7 +339,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       startGame,
       leaveGame,
       makeBonakChoice,
-      selectTrump
+      selectTrump,
+      playCard
     }}>
       {children}
     </GameContext.Provider>
