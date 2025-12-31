@@ -41,7 +41,7 @@ After completing each phase:
 - [x] Fase 1: Project Setup
 - [x] Fase 2: Lobby System
 - [x] Fase 3: Card System
-- [ ] Fase 4: Bonaken Phase
+- [x] Fase 4: Bonaken Phase
 - [ ] Fase 5: Trump Selection
 - [ ] Fase 6: Trick-Taking
 - [ ] Fase 7: Scoring

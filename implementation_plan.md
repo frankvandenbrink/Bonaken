@@ -151,39 +151,39 @@ Na elke fase:
 
 ---
 
-## Fase 4: Bonaken Fase
+## Fase 4: Bonaken Fase [VOLTOOID]
 
 **Doel:** Simultane geheime keuze "Bonaken" of "Passen"
 
 ### Server
-- [ ] `src/game/bonaken.ts`:
-  - [ ] `BonakChoice` interface
-  - [ ] `determineBonaker()` - Bij meerdere: eerste in wijzerzin vanaf deler
-  - [ ] Tracking van wie al gekozen heeft
-- [ ] `src/socket/bonakenHandlers.ts`:
-  - [ ] `bonaken-choice` event (bonaken/passen)
-  - [ ] `bonaken-phase-start` emit
-  - [ ] `player-chose` emit (zonder keuze te onthullen)
-  - [ ] `bonaken-revealed` emit wanneer allen gekozen
-  - [ ] `bonaker-determined` emit met winnende bonaker
+- [x] `src/game/bonaken.ts`:
+  - [x] `BonakChoice` interface
+  - [x] `determineBonaker()` - Bij meerdere: eerste in wijzerzin vanaf deler
+  - [x] Tracking van wie al gekozen heeft
+- [x] `src/socket/bonakenHandlers.ts`:
+  - [x] `bonaken-choice` event (bonaken/passen)
+  - [x] `bonaken-phase-start` emit
+  - [x] `player-chose` emit (zonder keuze te onthullen)
+  - [x] `bonaken-revealed` emit wanneer allen gekozen
+  - [x] `bonaker-determined` emit met winnende bonaker
 
 ### Client
-- [ ] `src/components/BonakenPhase.tsx`:
-  - [ ] Twee grote knoppen: "Bonaken" en "Passen"
-  - [ ] Na keuze: "Wachten op andere spelers..."
-  - [ ] Progress indicator (X van Y heeft gekozen)
-  - [ ] Onthulling animatie
-  - [ ] Resultaat: wie bonaakt of "Niemand bonaakt"
-- [ ] Game state update voor bonaken fase
+- [x] `src/components/BonakenPhase.tsx`:
+  - [x] Twee grote knoppen: "Bonaken" en "Passen"
+  - [x] Na keuze: "Wachten op andere spelers..."
+  - [x] Progress indicator (X van Y heeft gekozen)
+  - [x] Onthulling animatie
+  - [x] Resultaat: wie bonaakt of "Niemand bonaakt"
+- [x] Game state update voor bonaken fase
 
 ### Test Criteria
-- [ ] Na delen start bonaken fase automatisch
-- [ ] Elke speler ziet "Bonaken" en "Passen" knoppen
-- [ ] Na kiezen verschijnt wacht indicator
-- [ ] Keuzes worden pas onthuld als iedereen gekozen heeft
-- [ ] Bij één bonaker: die wint
-- [ ] Bij meerdere bonakers: eerste in wijzerzin vanaf deler wint
-- [ ] Bij niemand bonaakt: correct bericht getoond
+- [x] Na delen start bonaken fase automatisch
+- [x] Elke speler ziet "Bonaken" en "Passen" knoppen
+- [x] Na kiezen verschijnt wacht indicator
+- [x] Keuzes worden pas onthuld als iedereen gekozen heeft
+- [x] Bij één bonaker: die wint
+- [x] Bij meerdere bonakers: eerste in wijzerzin vanaf deler wint
+- [x] Bij niemand bonaakt: correct bericht getoond
 
 ---
 
