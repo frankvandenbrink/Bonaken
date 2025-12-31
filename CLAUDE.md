@@ -45,7 +45,7 @@ After completing each phase:
 - [x] Fase 5: Trump Selection
 - [x] Fase 6: Trick-Taking
 - [x] Fase 7: Scoring
-- [ ] Fase 8: Game End/Rematch
+- [x] Fase 8: Game End/Rematch
 - [ ] Fase 9: Disconnect Handling
 - [ ] Fase 10: Visual Polish
 - [ ] Fase 11: Cleanup/Stability

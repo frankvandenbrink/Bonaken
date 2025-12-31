@@ -339,38 +339,38 @@ Na elke fase:
 
 ---
 
-## Fase 8: Spel Einde & Rematch
+## Fase 8: Spel Einde & Rematch [VOLTOOID]
 
 **Doel:** 10+ punten = verloren, rematch mogelijkheid
 
 ### Server
-- [ ] `src/game/rematch.ts`:
-  - [ ] `resetForRematch()` - Reset scores, behoud spelers
-  - [ ] Deler roteert door
-- [ ] Socket events:
-  - [ ] `game-ended` emit met verliezer en finale scores
-  - [ ] `request-rematch` event
-  - [ ] `rematch-requested` emit
-  - [ ] `rematch-started` emit
+- [x] `src/game/rematch.ts`:
+  - [x] `resetForRematch()` - Reset scores, behoud spelers (in gameplayHandlers.ts)
+  - [x] Deler roteert door
+- [x] Socket events:
+  - [x] `game-ended` emit met verliezer en finale scores
+  - [x] `request-rematch` event
+  - [x] `rematch-requested` emit
+  - [x] `rematch-started` emit
 
 ### Client
-- [ ] `src/components/GameEnd.tsx`:
-  - [ ] Finale scorebord (gerangschikt)
-  - [ ] Verliezer highlight (10+ punten)
-  - [ ] "Nog een potje?" knop
-  - [ ] "Terug naar start" knop
-- [ ] Rematch flow:
-  - [ ] Toon wie rematch wil
-  - [ ] Start nieuwe ronde als allen akkoord
+- [x] `src/components/GameEnd.tsx`:
+  - [x] Finale scorebord (gerangschikt)
+  - [x] Verliezer highlight (10+ punten)
+  - [x] "Nog een potje?" knop
+  - [x] "Terug naar start" knop
+- [x] Rematch flow:
+  - [x] Toon wie rematch wil
+  - [x] Start nieuwe ronde als allen akkoord
 
 ### Test Criteria
-- [ ] Spel eindigt wanneer iemand 10+ punten bereikt
-- [ ] Eindscherm toont correcte finale scores
-- [ ] Verliezer is duidelijk gemarkeerd
-- [ ] "Nog een potje?" start nieuw spel
-- [ ] Scores zijn gereset bij rematch
-- [ ] Deler roteert bij rematch
-- [ ] "Terug naar start" werkt
+- [x] Spel eindigt wanneer iemand 10+ punten bereikt
+- [x] Eindscherm toont correcte finale scores
+- [x] Verliezer is duidelijk gemarkeerd
+- [x] "Nog een potje?" start nieuw spel
+- [x] Scores zijn gereset bij rematch
+- [x] Deler roteert bij rematch
+- [x] "Terug naar start" werkt
 
 ---
 
