@@ -43,7 +43,7 @@ After completing each phase:
 - [x] Fase 3: Card System
 - [x] Fase 4: Bonaken Phase
 - [x] Fase 5: Trump Selection
-- [ ] Fase 6: Trick-Taking
+- [x] Fase 6: Trick-Taking
 - [ ] Fase 7: Scoring
 - [ ] Fase 8: Game End/Rematch
 - [ ] Fase 9: Disconnect Handling

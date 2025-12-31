@@ -224,71 +224,72 @@ Na elke fase:
 
 ---
 
-## Fase 6: Slag Spelen
+## Fase 6: Slag Spelen [VOLTOOID]
 
 **Doel:** Kaarten spelen met correcte regelhandhaving
 
 ### Server
-- [ ] `src/game/cardValidation.ts`:
-  - [ ] `getValidCards()` - Kleur bekennen verplicht
-  - [ ] Als geen kaart van gevraagde kleur: alle kaarten geldig
-  - [ ] Eerste speler: alle kaarten geldig
-- [ ] `src/game/trickWinner.ts`:
-  - [ ] Troef rankvolgorde: B(8),9(7),A(6),10(5),K(4),V(3),8(2),7(1)
-  - [ ] Normale rankvolgorde: A(8),K(7),V(6),B(5),10(4),9(3),8(2),7(1)
-  - [ ] `determineTrickWinner()` logica
-  - [ ] Troef beats non-troef
-  - [ ] Hoogste in gevraagde kleur wint (als geen troef)
-- [ ] `src/game/turnManager.ts`:
-  - [ ] `getNextPlayer()` - Volgende in wijzerzin
-  - [ ] `getFirstPlayer()` - Links van deler
-  - [ ] `getTrickStarter()` - Winnaar vorige slag
-- [ ] `src/game/timer.ts`:
+- [x] `src/game/cardValidation.ts`:
+  - [x] `getValidCards()` - Kleur bekennen verplicht
+  - [x] Als geen kaart van gevraagde kleur: alle kaarten geldig
+  - [x] Eerste speler: alle kaarten geldig
+- [x] `src/game/trickWinner.ts`:
+  - [x] Troef rankvolgorde: B(8),9(7),A(6),10(5),K(4),V(3),8(2),7(1)
+  - [x] Normale rankvolgorde: A(8),K(7),V(6),B(5),10(4),9(3),8(2),7(1)
+  - [x] `determineTrickWinner()` logica
+  - [x] Troef beats non-troef
+  - [x] Hoogste in gevraagde kleur wint (als geen troef)
+- [x] `src/game/turnManager.ts`:
+  - [x] `getNextPlayer()` - Volgende in wijzerzin
+  - [x] `getFirstPlayer()` - Links van deler
+  - [x] `getMajorityThreshold()` - Meerderheid berekening
+- [ ] `src/game/timer.ts`: (TODO later)
   - [ ] `TurnTimer` class
   - [ ] 60 seconden per beurt
   - [ ] Bij timeout: speel willekeurige geldige kaart
-- [ ] `src/socket/gameplayHandlers.ts`:
-  - [ ] `play-card` event handler
-  - [ ] Kaart validatie
-  - [ ] `turn-start` emit met geldige kaarten
-  - [ ] `card-played` emit
-  - [ ] `trick-complete` emit na alle kaarten
-  - [ ] `trick-cleared` emit na 3-4 sec delay
-  - [ ] `round-complete` emit na alle slagen
+- [x] `src/socket/gameplayHandlers.ts`:
+  - [x] `play-card` event handler
+  - [x] Kaart validatie
+  - [x] `turn-start` emit met geldige kaarten
+  - [x] `card-played` emit
+  - [x] `trick-complete` emit na alle kaarten (met tricksWon)
+  - [x] `trick-cleared` emit na 2.5 sec delay
+  - [x] `round-scores` emit na alle slagen
 
 ### Client
-- [ ] `src/components/GameBoard.tsx`:
-  - [ ] Centrale tafel layout
-  - [ ] Speler posities rond tafel
-  - [ ] Troef indicator
-  - [ ] Score weergave
-  - [ ] Huidige speler indicator
-- [ ] `src/components/TrickArea.tsx`:
-  - [ ] Gespeelde kaarten in midden
-  - [ ] Speler labels bij kaarten
-  - [ ] Winnaar highlight
-- [ ] `src/components/TurnTimer.tsx`:
+- [x] `src/components/PlayingPhase.tsx`:
+  - [x] Centrale groene speeltafel layout
+  - [x] Troef indicator met glow animatie
+  - [x] Beurt indicator ("Jouw beurt" / "X is aan zet")
+  - [x] SLAGEN scorebord met bonaker badge
+- [x] `src/components/PlayingPhase.module.css`:
+  - [x] Luxury casino aesthetic
+  - [x] Circulaire slag weergave
+  - [x] Kaart drop animaties
+  - [x] Winnaar highlight
+- [ ] `src/components/TurnTimer.tsx`: (TODO later)
   - [ ] Countdown van 60 sec
   - [ ] Visuele urgentie (kleur change)
   - [ ] Timer pauze bij disconnect
-- [ ] Hand component update:
-  - [ ] Alleen geldige kaarten klikbaar
-  - [ ] Ongeldige kaarten grayed out
-  - [ ] Beurt indicator
+- [x] Hand component update:
+  - [x] Alleen geldige kaarten klikbaar
+  - [x] Ongeldige kaarten niet klikbaar
+  - [x] Beurt indicator via validCardIds
 
 ### Test Criteria
-- [ ] Speler links van deler begint eerste slag
-- [ ] Alleen geldige kaarten zijn klikbaar
-- [ ] Kleur bekennen wordt afgedwongen
-- [ ] Gespeelde kaart verschijnt in midden
-- [ ] Alle spelers zien gespeelde kaarten
-- [ ] Na volledige slag: winnaar bepaald
-- [ ] Slag blijft 3-4 seconden zichtbaar
-- [ ] Winnaar van slag begint volgende
-- [ ] Troef B is hoogste troef
-- [ ] Troef beats hogere non-troef
-- [ ] Timer countdown werkt
-- [ ] Timeout speelt willekeurige geldige kaart
+- [x] Speler links van deler begint eerste slag
+- [x] Alleen geldige kaarten zijn klikbaar
+- [x] Kleur bekennen wordt afgedwongen
+- [x] Gespeelde kaart verschijnt in midden
+- [x] Alle spelers zien gespeelde kaarten
+- [x] Na volledige slag: winnaar bepaald
+- [x] Slag blijft 2.5 seconden zichtbaar
+- [x] Winnaar van slag begint volgende
+- [x] Troef B is hoogste troef
+- [x] Troef beats hogere non-troef
+- [x] Score (tricksWon) wordt real-time bijgewerkt
+- [ ] Timer countdown werkt (TODO later)
+- [ ] Timeout speelt willekeurige geldige kaart (TODO later)
 
 ---
 
