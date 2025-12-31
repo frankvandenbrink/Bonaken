@@ -1,52 +1,50 @@
-import { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
-import type { ServerToClientEvents, ClientToServerEvents } from '@shared/index';
+import { GameProvider, useGame } from './contexts/GameContext';
+import { StartScreen } from './components/StartScreen';
+import { Lobby } from './components/Lobby';
 
-type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+function GameRouter() {
+  const { gamePhase } = useGame();
+
+  // Show lobby when in lobby phase
+  if (gamePhase === 'lobby') {
+    return <Lobby />;
+  }
+
+  // Show dealing/game screen when game starts
+  if (gamePhase === 'dealing' || gamePhase === 'bonaken' ||
+      gamePhase === 'trump-selection' || gamePhase === 'playing' ||
+      gamePhase === 'round-end' || gamePhase === 'game-end') {
+    // TODO: Implement game screen in later phases
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        gap: '1rem',
+        color: '#f5f5dc'
+      }}>
+        <h1 style={{ fontSize: '2rem', color: '#d4af37' }}>
+          Spel gestart!
+        </h1>
+        <p>Fase: {gamePhase}</p>
+        <p style={{ opacity: 0.6 }}>
+          (Game UI wordt in latere fasen geïmplementeerd)
+        </p>
+      </div>
+    );
+  }
+
+  // Default: show start screen
+  return <StartScreen />;
+}
 
 function App() {
-  const [socket, setSocket] = useState<TypedSocket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-
-  useEffect(() => {
-    const newSocket: TypedSocket = io('http://localhost:3001');
-
-    newSocket.on('connect', () => {
-      console.log('Verbonden met server');
-      setIsConnected(true);
-    });
-
-    newSocket.on('disconnect', () => {
-      console.log('Verbinding verbroken');
-      setIsConnected(false);
-    });
-
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
-
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100vh',
-      gap: '1rem'
-    }}>
-      <h1 style={{ fontSize: '3rem', color: '#d4af37' }}>Bonaken</h1>
-      <p style={{
-        padding: '0.5rem 1rem',
-        borderRadius: '4px',
-        backgroundColor: isConnected ? '#2e7d32' : '#c62828',
-        color: 'white'
-      }}>
-        {isConnected ? 'Verbonden met server' : 'Niet verbonden'}
-      </p>
-    </div>
+    <GameProvider>
+      <GameRouter />
+    </GameProvider>
   );
 }
 

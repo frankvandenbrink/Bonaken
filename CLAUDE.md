@@ -39,7 +39,7 @@ After completing each phase:
 
 ## Completed Features
 - [x] Fase 1: Project Setup
-- [ ] Fase 2: Lobby System
+- [x] Fase 2: Lobby System
 - [ ] Fase 3: Card System
 - [ ] Fase 4: Bonaken Phase
 - [ ] Fase 5: Trump Selection

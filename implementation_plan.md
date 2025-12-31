@@ -49,54 +49,54 @@ Na elke fase:
 
 ---
 
-## Fase 2: Lobby System
+## Fase 2: Lobby System [VOLTOOID]
 
 **Doel:** Spel aanmaken en joinen met 6-karakter codes
 
 ### Server
-- [ ] `src/utils/codeGenerator.ts` - Genereer 6-char alfanumerieke codes
-- [ ] `src/types/game.ts` - GameState, Player types
-- [ ] `src/game/GameManager.ts` - In-memory game storage (Map)
-- [ ] `src/socket/lobbyHandlers.ts`:
-  - [ ] `create-game` event handler
-  - [ ] `join-game` event handler
-  - [ ] `update-settings` event handler
-  - [ ] `start-game` event handler
-  - [ ] Duplicaat naam validatie
-  - [ ] Game not found error handling
+- [x] `src/utils/codeGenerator.ts` - Genereer 6-char alfanumerieke codes
+- [x] `src/types/game.ts` - GameState, Player types (in shared/src/index.ts)
+- [x] `src/game/GameManager.ts` - In-memory game storage (Map)
+- [x] `src/socket/lobbyHandlers.ts`:
+  - [x] `create-game` event handler
+  - [x] `join-game` event handler
+  - [x] `update-settings` event handler
+  - [x] `start-game` event handler
+  - [x] Duplicaat naam validatie
+  - [x] Game not found error handling
 
 ### Client
-- [ ] `src/hooks/useSocket.ts` - Socket.io React hook
-- [ ] `src/contexts/GameContext.tsx` - Game state context
-- [ ] `src/components/StartScreen.tsx`:
-  - [ ] "Nieuw spel starten" knop
-  - [ ] "Deelnemen aan spel" knop
-  - [ ] Moderne UI met frontend-design skill
-- [ ] `src/components/NicknameInput.tsx`:
-  - [ ] Bijnaam invoerveld
-  - [ ] localStorage persistentie
-  - [ ] Validatie (2-15 karakters)
-- [ ] `src/components/CreateGameModal.tsx`:
-  - [ ] Min/max spelers sliders (2-7)
-  - [ ] Aanmaken bevestiging
-- [ ] `src/components/JoinGameModal.tsx`:
-  - [ ] Code invoerveld (6 karakters)
-  - [ ] Error feedback bij ongeldige code
-- [ ] `src/components/Lobby.tsx`:
-  - [ ] Spelcode prominent weergeven
-  - [ ] Spelerslijst met online status
-  - [ ] "Wachten op spelers..." bericht
-  - [ ] Host: "Start Spel" knop (disabled tot min spelers)
-  - [ ] Speler aantal indicator
+- [x] `src/hooks/useSocket.ts` - Socket.io React hook
+- [x] `src/contexts/GameContext.tsx` - Game state context
+- [x] `src/components/StartScreen.tsx`:
+  - [x] "Nieuw spel starten" knop
+  - [x] "Deelnemen aan spel" knop
+  - [x] Moderne UI met frontend-design skill
+- [x] Nickname input in StartScreen (integrated):
+  - [x] Bijnaam invoerveld
+  - [x] localStorage persistentie
+  - [x] Validatie (2-15 karakters)
+- [x] `src/components/CreateGameModal.tsx`:
+  - [x] Min/max spelers sliders (2-7)
+  - [x] Aanmaken bevestiging
+- [x] `src/components/JoinGameModal.tsx`:
+  - [x] Code invoerveld (6 karakters)
+  - [x] Error feedback bij ongeldige code
+- [x] `src/components/Lobby.tsx`:
+  - [x] Spelcode prominent weergeven
+  - [x] Spelerslijst met online status
+  - [x] "Wachten op spelers..." bericht
+  - [x] Host: "Start Spel" knop (disabled tot min spelers)
+  - [x] Speler aantal indicator
 
 ### Test Criteria
-- [ ] Tab 1: Nieuw spel maken → ontvang 6-char code
-- [ ] Tab 2: Code invoeren → join lobby
-- [ ] Beide tabs tonen beide spelers
-- [ ] Duplicaat naam wordt geweigerd met foutmelding
-- [ ] Ongeldige code toont foutmelding
-- [ ] Host kan settings aanpassen
-- [ ] Start knop werkt alleen met 2+ spelers
+- [x] Tab 1: Nieuw spel maken → ontvang 6-char code
+- [x] Tab 2: Code invoeren → join lobby
+- [x] Beide tabs tonen beide spelers
+- [x] Duplicaat naam wordt geweigerd met foutmelding
+- [x] Ongeldige code toont foutmelding
+- [x] Host kan settings aanpassen
+- [x] Start knop werkt alleen met 2+ spelers
 
 ---
 

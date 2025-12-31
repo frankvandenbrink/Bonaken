@@ -3,10 +3,11 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import type {
-  GameState,
   ServerToClientEvents,
   ClientToServerEvents
 } from '../../shared/src/index';
+import { setupLobbyHandlers } from './socket/lobbyHandlers';
+import { gameManager } from './game/GameManager';
 
 const app = express();
 app.use(cors());
@@ -14,26 +15,30 @@ app.use(cors());
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: {
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'http://localhost:5174'],
     methods: ['GET', 'POST']
   }
 });
 
-// In-memory game storage
-const games = new Map<string, GameState>();
-
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', games: games.size });
+  res.json({ status: 'ok', games: gameManager.getActiveGamesCount() });
 });
 
 io.on('connection', (socket) => {
   console.log('Speler verbonden:', socket.id);
 
-  socket.on('disconnect', () => {
-    console.log('Speler losgekoppeld:', socket.id);
-  });
+  // Setup lobby handlers voor deze socket
+  setupLobbyHandlers(io, socket);
 });
+
+// Cleanup inactieve games elke minuut
+setInterval(() => {
+  const cleaned = gameManager.cleanupInactiveGames();
+  if (cleaned > 0) {
+    console.log(`${cleaned} inactieve spellen opgeruimd`);
+  }
+}, 60000);
 
 const PORT = process.env.PORT || 3001;
 

@@ -1,0 +1,316 @@
+/* Modal Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Modal Container */
+.modal {
+  width: 100%;
+  max-width: 400px;
+  background: linear-gradient(
+    180deg,
+    var(--wood-medium) 0%,
+    var(--wood-dark) 100%
+  );
+  border: 2px solid var(--wood-light);
+  border-radius: 8px;
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Close button */
+.closeButton {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  width: 32px;
+  height: 32px;
+  background: none;
+  color: var(--cream);
+  opacity: 0.5;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.closeButton:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Header */
+.header {
+  padding: var(--space-xl) var(--space-xl) var(--space-md);
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.title {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-xs);
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--cream);
+  opacity: 0.7;
+}
+
+/* Warning */
+.warning {
+  margin: var(--space-md) var(--space-xl) 0;
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(198, 40, 40, 0.2);
+  border: 1px solid var(--error-red);
+  border-radius: var(--border-radius);
+  color: #ff8a80;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Content */
+.content {
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Settings (for CreateGameModal) */
+.setting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.settingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settingLabel {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.settingValue {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cream);
+  min-width: 2ch;
+  text-align: center;
+}
+
+/* Slider */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: var(--wood-dark);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(
+    180deg,
+    var(--gold-light) 0%,
+    var(--gold) 50%,
+    var(--gold-dark) 100%
+  );
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(
+    180deg,
+    var(--gold-light) 0%,
+    var(--gold) 50%,
+    var(--gold-dark) 100%
+  );
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.sliderLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--cream);
+  opacity: 0.5;
+}
+
+/* Info box */
+.infoBox {
+  padding: var(--space-md);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--border-radius);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.infoBox strong {
+  color: var(--gold);
+}
+
+/* Code input (for JoinGameModal) */
+.codeInputWrapper {
+  position: relative;
+}
+
+.codeInput {
+  width: 100%;
+  padding: var(--space-lg);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.5em;
+  text-align: center;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  color: var(--cream);
+  caret-color: var(--gold);
+}
+
+.codeInput:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.codeInput::placeholder {
+  color: rgba(245, 245, 220, 0.2);
+  letter-spacing: 0.3em;
+}
+
+.codeUnderline {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: calc(var(--space-sm) * -1);
+}
+
+.codeChar {
+  width: 36px;
+  height: 4px;
+  background: var(--wood-light);
+  border-radius: 2px;
+  transition: background-color 0.2s ease;
+}
+
+.codeChar.filled {
+  background: var(--gold);
+}
+
+.hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--cream);
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-xl) var(--space-xl);
+}
+
+.cancelButton,
+.confirmButton {
+  flex: 1;
+  padding: var(--space-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: var(--border-radius);
+}
+
+.cancelButton {
+  background: transparent;
+  color: var(--cream);
+  border: 1px solid var(--wood-light);
+}
+
+.cancelButton:hover {
+  border-color: var(--cream);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.confirmButton {
+  background: linear-gradient(
+    180deg,
+    var(--gold-light) 0%,
+    var(--gold) 50%,
+    var(--gold-dark) 100%
+  );
+  color: var(--wood-dark);
+  border: none;
+  box-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+}
+
+.confirmButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+}
+
+.confirmButton:disabled {
+  background: var(--wood-light);
+  color: var(--cream);
+  opacity: 0.5;
+  box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .modal {
+    margin: var(--space-sm);
+  }
+
+  .codeInput {
+    font-size: 1.5rem;
+    letter-spacing: 0.3em;
+  }
+
+  .codeChar {
+    width: 28px;
+  }
+}
