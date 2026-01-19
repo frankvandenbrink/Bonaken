@@ -9,7 +9,9 @@ export function useSocket() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socket: TypedSocket = io('http://localhost:3001');
+    // In production, connect to same origin; in dev, connect to localhost:3001
+    const serverUrl = import.meta.env.PROD ? window.location.origin : 'http://localhost:3001';
+    const socket: TypedSocket = io(serverUrl);
     socketRef.current = socket;
 
     socket.on('connect', () => {

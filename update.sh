@@ -7,7 +7,7 @@ set -e
 cd /srv/docker/bonaken
 
 echo "==> Pulling latest changes..."
-git pull
+GIT_SSH_COMMAND="ssh -i /root/.ssh/bonaken_deploy -o IdentitiesOnly=yes" git pull
 
 echo "==> Building and restarting containers..."
 docker compose up -d --build

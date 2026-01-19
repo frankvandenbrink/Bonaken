@@ -23,7 +23,9 @@ app.use(express.static(clientDistPath));
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: {
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: process.env.NODE_ENV === 'production'
+      ? ['https://bonaken.frankvdbrink.nl']
+      : ['http://localhost:5173', 'http://localhost:5174'],
     methods: ['GET', 'POST']
   }
 });
