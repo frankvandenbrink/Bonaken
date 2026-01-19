@@ -1,4 +1,4 @@
-import type { Player } from '../../../shared/src/index';
+import type { Player } from 'shared';
 
 /**
  * Krijg de volgende speler in wijzerzin

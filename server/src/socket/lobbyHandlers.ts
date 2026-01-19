@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import type { ServerToClientEvents, ClientToServerEvents, GameSettings } from '../../../shared/src/index';
+import type { ServerToClientEvents, ClientToServerEvents, GameSettings } from 'shared';
 import { gameManager } from '../game/GameManager';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;

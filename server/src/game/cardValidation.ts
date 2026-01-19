@@ -1,4 +1,4 @@
-import type { Card, Suit, PlayedCard } from '../../../shared/src/index';
+import type { Card, Suit, PlayedCard } from 'shared';
 
 /**
  * Bepaal welke kaarten een speler mag spelen

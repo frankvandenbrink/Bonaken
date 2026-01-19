@@ -1,4 +1,4 @@
-import type { BonakChoice, Player } from '../../../shared/src/index';
+import type { BonakChoice, Player } from 'shared';
 
 /**
  * Check of alle spelers een keuze hebben gemaakt

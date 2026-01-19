@@ -1,4 +1,4 @@
-import type { Card, Player } from '../../../shared/src/index';
+import type { Card, Player } from 'shared';
 import { createDeck, shuffleDeck } from './deck';
 
 interface DealResult {

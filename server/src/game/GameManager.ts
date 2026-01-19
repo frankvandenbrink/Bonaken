@@ -1,4 +1,4 @@
-import type { GameState, Player, GameSettings, GamePhase, Card } from '../../../shared/src/index';
+import type { GameState, Player, GameSettings, GamePhase, Card } from 'shared';
 import { generateGameCode } from '../utils/codeGenerator';
 import { dealCards, getCardDistribution } from './dealing';
 

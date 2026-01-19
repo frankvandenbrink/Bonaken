@@ -2,10 +2,11 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import path from 'path';
 import type {
   ServerToClientEvents,
   ClientToServerEvents
-} from '../../shared/src/index';
+} from 'shared';
 import { setupLobbyHandlers } from './socket/lobbyHandlers';
 import { setupBonakenHandlers } from './socket/bonakenHandlers';
 import { setupTrumpHandlers } from './socket/trumpHandlers';
@@ -14,6 +15,10 @@ import { gameManager } from './game/GameManager';
 
 const app = express();
 app.use(cors());
+
+// Serve static files from client build
+const clientDistPath = path.join(__dirname, '../../client/dist');
+app.use(express.static(clientDistPath));
 
 const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
@@ -26,6 +31,11 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', games: gameManager.getActiveGamesCount() });
+});
+
+// SPA catch-all route - serve index.html for all other routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
 io.on('connection', (socket) => {

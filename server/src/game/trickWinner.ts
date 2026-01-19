@@ -1,4 +1,4 @@
-import type { Rank, Suit, PlayedCard } from '../../../shared/src/index';
+import type { Rank, Suit, PlayedCard } from 'shared';
 
 /**
  * Troef rankvolgorde (hoogste eerst)

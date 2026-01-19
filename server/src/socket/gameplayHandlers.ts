@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import type { ServerToClientEvents, ClientToServerEvents, GameState, PlayedCard } from '../../../shared/src/index';
+import type { ServerToClientEvents, ClientToServerEvents, GameState, PlayedCard } from 'shared';
 import { gameManager } from '../game/GameManager';
 import { isValidCard, getValidCardIds } from '../game/cardValidation';
 import { getTrickWinnerId } from '../game/trickWinner';

@@ -1,4 +1,4 @@
-import type { Card, Suit, Rank } from '../../../shared/src/index';
+import type { Card, Suit, Rank } from 'shared';
 
 const SUITS: Suit[] = ['schoppen', 'harten', 'klaveren', 'ruiten'];
 const RANKS: Rank[] = ['7', '8', '9', '10', 'B', 'V', 'K', 'A'];
