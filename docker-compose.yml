@@ -1,0 +1,47 @@
+# Bonaken - Docker Compose Configuration
+# Multiplayer card game deployment
+#
+# NOTE TO SERVER MANAGER AGENT:
+# This is a REFERENCE configuration. Feel free to modify as needed for your VPS setup.
+# The key requirement is that the bonaken container exposes port 3001 internally.
+
+services:
+  bonaken:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bonaken
+    restart: unless-stopped
+    ports:
+      # Map container port 3001 to host
+      # Modify host port if needed, but keep container port as 3001
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    # Optional: Resource limits (uncomment and adjust as needed)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '0.25'
+    #       memory: 256M
+    networks:
+      - bonaken-network
+
+networks:
+  bonaken-network:
+    driver: bridge
+    # NOTE: If you have an existing network for nginx proxy,
+    # you may want to connect this container to that network instead.
+    # Example:
+    # external: true
+    # name: your-nginx-network
