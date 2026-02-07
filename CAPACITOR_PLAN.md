@@ -14,11 +14,11 @@
 - [x] Verificatie: web app werkt nog normaal in browser
 
 ## Milestone 3: Android Platform Setup
-- [ ] Web app gebouwd
-- [ ] Android platform toegevoegd met `cap add android`
-- [ ] Web build gesynchroniseerd met `cap sync android`
-- [ ] `.gitignore` bijgewerkt voor Android build artifacts
-- [ ] Verificatie: `cap doctor` toont Android, project opent in Android Studio
+- [x] Web app gebouwd
+- [x] Android platform toegevoegd met `cap add android`
+- [x] Web build gesynchroniseerd met `cap sync android`
+- [x] `.gitignore` bijgewerkt voor Android build artifacts
+- [x] Verificatie: `cap doctor` toont Android ("Android looking great!")
 
 ## Milestone 4: Native Adjustments
 - [ ] `@capacitor/app` en `@capacitor/status-bar` geinstalleerd

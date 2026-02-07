@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bonaken</string>
+    <string name="title_activity_main">Bonaken</string>
+    <string name="package_name">nl.frankvdbrink.bonaken</string>
+    <string name="custom_url_scheme">nl.frankvdbrink.bonaken</string>
+</resources>
