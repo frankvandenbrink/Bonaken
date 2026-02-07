@@ -29,8 +29,8 @@
 - [ ] Verificatie: app draait in emulator met correcte native UI (vereist Android Studio)
 
 ## Milestone 5: App Lifecycle & Socket Reconnection
-- [ ] `appStateChange` listener toegevoegd voor socket reconnectie
-- [ ] Verificatie: socket herstelt na app achtergrond/voorgrond
+- [x] `appStateChange` listener toegevoegd voor socket reconnectie
+- [ ] Verificatie: socket herstelt na app achtergrond/voorgrond (vereist Android Studio)
 
 ## Milestone 6: Build, Test & Document
 - [ ] Volledige E2E test tegen productie server

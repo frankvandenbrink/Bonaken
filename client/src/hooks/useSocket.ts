@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
 import type { ServerToClientEvents, ClientToServerEvents } from '@shared/index';
 
 type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -36,8 +37,19 @@ export function useSocket() {
       setIsConnected(false);
     });
 
+    // Reconnect when app returns to foreground on native platforms
+    let appStateListener: Awaited<ReturnType<typeof App.addListener>> | null = null;
+    if (Capacitor.isNativePlatform()) {
+      App.addListener('appStateChange', ({ isActive }) => {
+        if (isActive && socket.disconnected) {
+          socket.connect();
+        }
+      }).then(l => { appStateListener = l; });
+    }
+
     return () => {
       socket.disconnect();
+      appStateListener?.remove();
     };
   }, []);
 
