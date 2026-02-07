@@ -21,12 +21,12 @@
 - [x] Verificatie: `cap doctor` toont Android ("Android looking great!")
 
 ## Milestone 4: Native Adjustments
-- [ ] `@capacitor/app` en `@capacitor/status-bar` geinstalleerd
-- [ ] Status bar geconfigureerd (donker thema, `#2c1810`)
-- [ ] Android back button handler toegevoegd
-- [ ] Viewport meta tag bijgewerkt voor safe areas
-- [ ] Touch behavior CSS toegevoegd (no zoom, no highlight, no callout)
-- [ ] Verificatie: app draait in emulator met correcte native UI
+- [x] `@capacitor/app` en `@capacitor/status-bar` geinstalleerd
+- [x] Status bar geconfigureerd (donker thema, `#2c1810`)
+- [x] Android back button handler toegevoegd
+- [x] Viewport meta tag bijgewerkt voor safe areas
+- [x] Touch behavior CSS toegevoegd (no zoom, no highlight, no callout)
+- [ ] Verificatie: app draait in emulator met correcte native UI (vereist Android Studio)
 
 ## Milestone 5: App Lifecycle & Socket Reconnection
 - [ ] `appStateChange` listener toegevoegd voor socket reconnectie
