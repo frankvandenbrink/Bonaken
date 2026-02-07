@@ -9,9 +9,9 @@
 - [x] Verificatie: `cap doctor` succesvol, `npm run build` werkt nog
 
 ## Milestone 2: Socket.io URL & Server CORS
-- [ ] `useSocket.ts` aangepast met Capacitor platform detectie
-- [ ] Server CORS bijgewerkt voor Capacitor origins
-- [ ] Verificatie: web app werkt nog normaal in browser
+- [x] `useSocket.ts` aangepast met Capacitor platform detectie
+- [x] Server CORS bijgewerkt voor Capacitor origins
+- [x] Verificatie: web app werkt nog normaal in browser
 
 ## Milestone 3: Android Platform Setup
 - [ ] Web app gebouwd

@@ -1,16 +1,28 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { Capacitor } from '@capacitor/core';
 import type { ServerToClientEvents, ClientToServerEvents } from '@shared/index';
 
 type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+
+const PRODUCTION_SERVER_URL = import.meta.env.VITE_SERVER_URL || 'https://bonaken.frankvdbrink.nl';
+
+function getServerUrl(): string {
+  if (Capacitor.isNativePlatform()) {
+    return PRODUCTION_SERVER_URL;
+  }
+  if (import.meta.env.PROD) {
+    return window.location.origin;
+  }
+  return 'http://localhost:3001';
+}
 
 export function useSocket() {
   const socketRef = useRef<TypedSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // In production, connect to same origin; in dev, connect to localhost:3001
-    const serverUrl = import.meta.env.PROD ? window.location.origin : 'http://localhost:3001';
+    const serverUrl = getServerUrl();
     const socket: TypedSocket = io(serverUrl);
     socketRef.current = socket;
 
