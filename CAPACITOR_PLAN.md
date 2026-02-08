@@ -36,6 +36,6 @@
 - [x] Volledige E2E test tegen lokale server (emulator)
 - [x] E2E test tegen productie server
 - [x] App icon geconfigureerd
-- [ ] Signing keystore aangemaakt
-- [ ] Release APK/AAB gebouwd
-- [ ] Build proces gedocumenteerd
+- [x] Signing keystore aangemaakt
+- [x] Release APK/AAB gebouwd
+- [x] Build proces gedocumenteerd
