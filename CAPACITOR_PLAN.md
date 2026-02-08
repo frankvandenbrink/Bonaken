@@ -34,8 +34,8 @@
 
 ## Milestone 6: Build, Test & Document
 - [x] Volledige E2E test tegen lokale server (emulator)
-- [ ] E2E test tegen productie server
-- [ ] App icon geconfigureerd
+- [x] E2E test tegen productie server
+- [x] App icon geconfigureerd
 - [ ] Signing keystore aangemaakt
 - [ ] Release APK/AAB gebouwd
 - [ ] Build proces gedocumenteerd

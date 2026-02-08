@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Gold gradient for main elements -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8c252"/>
+      <stop offset="35%" stop-color="#d4af37"/>
+      <stop offset="65%" stop-color="#c9a02e"/>
+      <stop offset="100%" stop-color="#b8942d"/>
+    </linearGradient>
+
+    <!-- Bright gold for highlights -->
+    <linearGradient id="goldHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0d060"/>
+      <stop offset="50%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#a07820"/>
+    </linearGradient>
+
+    <!-- Dark inset shadow -->
+    <filter id="innerGlow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
+      <feOffset dx="0" dy="2" result="offsetBlur"/>
+      <feComposite in="SourceGraphic" in2="offsetBlur" operator="over"/>
+    </filter>
+
+    <!-- Drop shadow for depth -->
+    <filter id="dropShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="4"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle emboss for the letter -->
+    <filter id="emboss">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+      <feOffset dx="0" dy="-3" result="lightOffset"/>
+      <feComposite in="lightOffset" in2="SourceAlpha" operator="in" result="lightCrop"/>
+      <feFlood flood-color="#f5e6a3" flood-opacity="0.4" result="lightColor"/>
+      <feComposite in="lightColor" in2="lightCrop" operator="in" result="highlight"/>
+      <feOffset in="blur" dx="0" dy="3" result="darkOffset"/>
+      <feComposite in="darkOffset" in2="SourceAlpha" operator="in" result="darkCrop"/>
+      <feFlood flood-color="#1a0e06" flood-opacity="0.6" result="darkColor"/>
+      <feComposite in="darkColor" in2="darkCrop" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="highlight"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background - rich dark wood -->
+  <rect width="1024" height="1024" fill="#2c1810"/>
+
+  <!-- Subtle radial warmth -->
+  <circle cx="512" cy="480" r="460" fill="url(#goldGrad)" opacity="0.06"/>
+
+  <!-- Outer ornate border ring -->
+  <circle cx="512" cy="512" r="440" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.7"/>
+  <circle cx="512" cy="512" r="420" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4"/>
+
+  <!-- Corner suit symbols at cardinal points - small, ornamental -->
+  <!-- Top - Spade -->
+  <g transform="translate(512, 115)" fill="url(#goldGrad)" opacity="0.85">
+    <path d="M0,-28 C0,-28 -20,0 -20,12 C-20,22 -12,28 -4,26 C-2,25.5 0,30 0,38 C0,30 2,25.5 4,26 C12,28 20,22 20,12 C20,0 0,-28 0,-28Z" transform="scale(0.9)"/>
+  </g>
+
+  <!-- Bottom - Heart -->
+  <g transform="translate(512, 909)" fill="#c62828" opacity="0.85">
+    <path d="M0,24 C0,24 -24,-2 -24,-14 C-24,-24 -14,-30 -4,-22 C-1,-19.5 0,-18 0,-18 C0,-18 1,-19.5 4,-22 C14,-30 24,-24 24,-14 C24,-2 0,24 0,24Z" transform="scale(0.9)"/>
+  </g>
+
+  <!-- Left - Diamond -->
+  <g transform="translate(115, 512)" fill="#c62828" opacity="0.85">
+    <path d="M0,-26 L16,0 L0,26 L-16,0Z" transform="scale(0.85)"/>
+  </g>
+
+  <!-- Right - Club -->
+  <g transform="translate(909, 512)" fill="url(#goldGrad)" opacity="0.85">
+    <path d="M0,-20 C8,-20 14,-14 14,-7 C14,0 8,6 2,6 C4,4 6,0 6,-3 C6,-3 14,2 14,12 C14,20 8,24 0,24 C0,28 0,34 0,34 L0,34 C0,34 0,28 0,24 C-8,24 -14,20 -14,12 C-14,2 -6,-3 -6,-3 C-6,0 -4,4 -2,6 C-8,6 -14,0 -14,-7 C-14,-14 -8,-20 0,-20Z" transform="scale(0.85)"/>
+  </g>
+
+  <!-- Decorative corner flourishes -->
+  <!-- Top-left -->
+  <g transform="translate(180, 180)" stroke="url(#goldGrad)" fill="none" stroke-width="2.5" opacity="0.6">
+    <path d="M0,40 Q0,0 40,0"/>
+    <path d="M0,55 Q0,8 55,0"/>
+    <circle cx="3" cy="3" r="3" fill="url(#goldGrad)" stroke="none"/>
+  </g>
+  <!-- Top-right -->
+  <g transform="translate(844, 180)" stroke="url(#goldGrad)" fill="none" stroke-width="2.5" opacity="0.6">
+    <path d="M0,0 Q0,0 -40,0 Q0,0 0,40"/>
+    <path d="M-55,0 Q0,8 0,55"/>
+    <circle cx="-3" cy="3" r="3" fill="url(#goldGrad)" stroke="none"/>
+  </g>
+  <!-- Bottom-left -->
+  <g transform="translate(180, 844)" stroke="url(#goldGrad)" fill="none" stroke-width="2.5" opacity="0.6">
+    <path d="M40,0 Q0,0 0,-40"/>
+    <path d="M55,0 Q0,-8 0,-55"/>
+    <circle cx="3" cy="-3" r="3" fill="url(#goldGrad)" stroke="none"/>
+  </g>
+  <!-- Bottom-right -->
+  <g transform="translate(844, 844)" stroke="url(#goldGrad)" fill="none" stroke-width="2.5" opacity="0.6">
+    <path d="M-40,0 Q0,0 0,-40"/>
+    <path d="M-55,0 Q0,-8 0,-55"/>
+    <circle cx="-3" cy="-3" r="3" fill="url(#goldGrad)" stroke="none"/>
+  </g>
+
+  <!-- Inner decorative diamond frame around the B -->
+  <g transform="translate(512, 490)" fill="none" stroke="url(#goldGrad)" stroke-width="3" opacity="0.5">
+    <rect x="-180" y="-200" width="360" height="400" rx="12" transform="rotate(0)"/>
+  </g>
+  <g transform="translate(512, 490)" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.35">
+    <rect x="-168" y="-188" width="336" height="376" rx="8"/>
+  </g>
+
+  <!-- Horizontal ornamental lines flanking the B -->
+  <g stroke="url(#goldGrad)" stroke-width="2" opacity="0.5">
+    <line x1="355" y1="350" x2="440" y2="350"/>
+    <line x1="584" y1="350" x2="669" y2="350"/>
+    <line x1="355" y1="630" x2="440" y2="630"/>
+    <line x1="584" y1="630" x2="669" y2="630"/>
+    <!-- Small diamonds at line ends -->
+    <g fill="url(#goldGrad)" stroke="none">
+      <rect x="347" y="347" width="6" height="6" transform="rotate(45, 350, 350)"/>
+      <rect x="669" y="347" width="6" height="6" transform="rotate(45, 672, 350)"/>
+      <rect x="347" y="627" width="6" height="6" transform="rotate(45, 350, 630)"/>
+      <rect x="669" y="627" width="6" height="6" transform="rotate(45, 672, 630)"/>
+    </g>
+  </g>
+
+  <!-- The main "B" letter - large, Victorian serif style -->
+  <g filter="url(#emboss)">
+    <text x="512" y="540"
+          font-family="'Georgia', 'Times New Roman', serif"
+          font-size="380"
+          font-weight="bold"
+          fill="url(#goldHighlight)"
+          text-anchor="middle"
+          dominant-baseline="central"
+          letter-spacing="-8">B</text>
+  </g>
+
+  <!-- Small spade and heart flanking the B at mid-height -->
+  <g transform="translate(370, 490)" fill="url(#goldGrad)" opacity="0.7">
+    <path d="M0,-14 C0,-14 -10,0 -10,6 C-10,11 -6,14 -2,13 C-1,12.8 0,15 0,19 C0,15 1,12.8 2,13 C6,14 10,11 10,6 C10,0 0,-14 0,-14Z" transform="scale(0.7)"/>
+  </g>
+  <g transform="translate(654, 490)" fill="#c62828" opacity="0.7">
+    <path d="M0,12 C0,12 -12,-1 -12,-7 C-12,-12 -7,-15 -2,-11 C0,-9.5 0,-9 0,-9 C0,-9 0,-9.5 2,-11 C7,-15 12,-12 12,-7 C12,-1 0,12 0,12Z" transform="scale(0.7)"/>
+  </g>
+
+  <!-- "BONAKEN" text at bottom -->
+  <text x="512" y="770"
+        font-family="'Georgia', 'Times New Roman', serif"
+        font-size="56"
+        font-weight="normal"
+        fill="url(#goldGrad)"
+        text-anchor="middle"
+        letter-spacing="18"
+        opacity="0.9">BONAKEN</text>
+
+  <!-- Small decorative line under text -->
+  <line x1="380" y1="790" x2="644" y2="790" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.5"/>
+</svg>
