@@ -26,14 +26,15 @@
 - [x] Android back button handler toegevoegd
 - [x] Viewport meta tag bijgewerkt voor safe areas
 - [x] Touch behavior CSS toegevoegd (no zoom, no highlight, no callout)
-- [ ] Verificatie: app draait in emulator met correcte native UI (vereist Android Studio)
+- [x] Verificatie: app draait in emulator met correcte native UI
 
 ## Milestone 5: App Lifecycle & Socket Reconnection
 - [x] `appStateChange` listener toegevoegd voor socket reconnectie
-- [ ] Verificatie: socket herstelt na app achtergrond/voorgrond (vereist Android Studio)
+- [x] Verificatie: socket herstelt na app achtergrond/voorgrond
 
 ## Milestone 6: Build, Test & Document
-- [ ] Volledige E2E test tegen productie server
+- [x] Volledige E2E test tegen lokale server (emulator)
+- [ ] E2E test tegen productie server
 - [ ] App icon geconfigureerd
 - [ ] Signing keystore aangemaakt
 - [ ] Release APK/AAB gebouwd
