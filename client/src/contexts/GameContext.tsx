@@ -261,8 +261,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }),
 
       // Gameplay
-      on('turn-start', ({ playerId: turnPlayerId, validCardIds: validIds, deadline }) => {
+      on('playing-start', () => {
         setGamePhase('playing');
+      }),
+
+      on('turn-start', ({ playerId: turnPlayerId, validCardIds: validIds, deadline }) => {
         setCurrentTurn(turnPlayerId);
         setValidCardIds(validIds);
         setTrickWinner(null);

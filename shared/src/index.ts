@@ -154,6 +154,7 @@ export interface ServerToClientEvents {
   'false-roem': (data: { playerId: string }) => void;
 
   // Gameplay
+  'playing-start': () => void;
   'turn-start': (data: { playerId: string; validCardIds: string[]; deadline: number | null }) => void;
   'card-played': (data: { playerId: string; card: Card }) => void;
   'trick-complete': (data: { winnerId: string; trickPoints: number; tricksWon: Record<string, number> }) => void;

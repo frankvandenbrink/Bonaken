@@ -105,7 +105,8 @@ export function startSwapTimer(io: TypedServer, game: import('shared').GameState
         game.phase = 'playing';
         io.to(game.id).emit('trump-selected', { trump: null as unknown as import('shared').Suit });
         setTimeout(() => {
-                    const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
+          io.to(game.id).emit('playing-start');
+          const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
           const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
           startPlayerTurn(io, game, game.players[firstPlayerIndex].id);
         }, 1000);
@@ -145,8 +146,9 @@ export function startTrumpTimer(io: TypedServer, game: import('shared').GameStat
       io.to(game.id).emit('trump-selected', { trump: randomSuit });
 
       setTimeout(() => {
-                game.phase = 'playing';
+        game.phase = 'playing';
         game.lastActivity = Date.now();
+        io.to(game.id).emit('playing-start');
         const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
         const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
         startPlayerTurn(io, game, game.players[firstPlayerIndex].id);

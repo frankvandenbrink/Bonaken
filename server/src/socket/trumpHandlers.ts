@@ -83,6 +83,7 @@ export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
 
       // Start speelfase
       setTimeout(() => {
+        io.to(game.id).emit('playing-start');
         const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
         const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
         const firstPlayer = game.players[firstPlayerIndex];
@@ -136,6 +137,8 @@ export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
     setTimeout(() => {
       game.phase = 'playing';
       game.lastActivity = Date.now();
+
+      io.to(game.id).emit('playing-start');
 
       const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
       const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
