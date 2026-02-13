@@ -157,7 +157,7 @@ export interface ServerToClientEvents {
   'playing-start': () => void;
   'turn-start': (data: { playerId: string; validCardIds: string[]; deadline: number | null }) => void;
   'card-played': (data: { playerId: string; card: Card }) => void;
-  'trick-complete': (data: { winnerId: string; trickPoints: number; tricksWon: Record<string, number> }) => void;
+  'trick-complete': (data: { winnerId: string; trickPoints: number; tricksWon: Record<string, number>; playerTrickPoints: Record<string, number> }) => void;
   'trick-cleared': () => void;
 
   // Scoring

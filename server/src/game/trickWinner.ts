@@ -18,14 +18,14 @@ const TRUMP_RANK_VALUES: Record<Rank, number> = {
 
 /**
  * Normale rankvolgorde (hoogste eerst)
- * A(8) > K(7) > V(6) > B(5) > 10(4) > 9(3) > 8(2) > 7(1)
+ * A(8) > 10(7) > K(6) > V(5) > B(4) > 9(3) > 8(2) > 7(1)
  */
 const NORMAL_RANK_VALUES: Record<Rank, number> = {
   'A': 8,
-  'K': 7,
-  'V': 6,
-  'B': 5,
-  '10': 4,
+  '10': 7,
+  'K': 6,
+  'V': 5,
+  'B': 4,
   '9': 3,
   '8': 2,
   '7': 1

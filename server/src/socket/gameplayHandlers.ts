@@ -9,6 +9,7 @@ import { initBiddingState } from '../game/bidding';
 import { dealCards } from '../game/dealing';
 import { determineRoundResult, isGameComplete } from '../game/scoring';
 import { startTimer, cancelTimer } from '../game/timer';
+import { startBidTimer } from './biddingHandlers';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -160,11 +161,13 @@ function handleTrickComplete(io: TypedServer, game: GameState) {
   }
 
   const tricksWon: Record<string, number> = {};
+  const playerTrickPoints: Record<string, number> = {};
   game.players.forEach(p => {
     tricksWon[p.id] = p.tricksWon;
+    playerTrickPoints[p.id] = p.trickPoints;
   });
 
-  io.to(game.id).emit('trick-complete', { winnerId, trickPoints: trickPts, tricksWon });
+  io.to(game.id).emit('trick-complete', { winnerId, trickPoints: trickPts, tricksWon, playerTrickPoints });
 
   setTimeout(() => {
     game.currentTrick = [];
@@ -344,6 +347,7 @@ function startNextRound(io: TypedServer, game: GameState) {
     firstBidder: biddingState.firstBidder
   });
 
+  startBidTimer(io, game);
   game.lastActivity = Date.now();
 }
 

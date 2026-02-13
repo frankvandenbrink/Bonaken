@@ -279,12 +279,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
       }),
 
-      on('trick-complete', ({ winnerId, trickPoints: points, tricksWon }) => {
+      on('trick-complete', ({ winnerId, trickPoints: points, tricksWon, playerTrickPoints }) => {
         setTrickWinner(winnerId);
         setCurrentTurn(null);
         setPlayers(prev => prev.map(p => ({
           ...p,
-          tricksWon: tricksWon[p.id] ?? p.tricksWon
+          tricksWon: tricksWon[p.id] ?? p.tricksWon,
+          trickPoints: playerTrickPoints?.[p.id] ?? p.trickPoints
         })));
       }),
 
