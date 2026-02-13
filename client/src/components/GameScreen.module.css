@@ -80,11 +80,18 @@
   padding: var(--space-md);
 }
 
+.playerListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
 .playerList h3 {
   font-family: var(--font-display);
   font-size: 0.9rem;
   color: var(--gold);
-  margin-bottom: var(--space-md);
+  margin-bottom: 0;
   letter-spacing: 0.05em;
 }
 
@@ -93,9 +100,12 @@
 }
 
 .playerList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--space-sm) 0;
   color: var(--cream);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -103,9 +113,27 @@
   border-bottom: none;
 }
 
+.playerNameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.offlineTag {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
 .currentPlayer {
   color: var(--gold) !important;
   font-weight: 500;
+}
+
+.activeTurn {
+  background: rgba(212, 175, 55, 0.08);
+  border-radius: 3px;
+  padding-left: var(--space-xs) !important;
+  padding-right: var(--space-xs) !important;
 }
 
 /* Center area */
@@ -116,53 +144,6 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-}
-
-/* Bonaken phase */
-.bonakenPhase {
-  animation: fadeIn 0.5s ease;
-}
-
-.bonakenPhase h2 {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  color: var(--gold);
-  margin-bottom: var(--space-md);
-}
-
-.bonakenPhase p {
-  color: var(--cream);
-  opacity: 0.9;
-  margin-bottom: var(--space-sm);
-}
-
-.cardCount {
-  font-size: 1.1rem;
-  color: var(--gold-light) !important;
-  opacity: 1 !important;
-}
-
-.trump {
-  margin-top: var(--space-md);
-  font-size: 1.2rem;
-  color: var(--felt-green-light) !important;
-}
-
-/* Trump selection phase */
-.trumpSelection {
-  animation: fadeIn 0.5s ease;
-}
-
-.trumpSelection h2 {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  color: var(--gold);
-  margin-bottom: var(--space-md);
-}
-
-.trumpSelection p {
-  color: var(--cream);
-  opacity: 0.9;
 }
 
 /* Dealing animation */
@@ -231,10 +212,6 @@
   .centerArea {
     order: 1;
     padding: var(--space-md) 0;
-  }
-
-  .bonakenPhase h2 {
-    font-size: 1.5rem;
   }
 }
 

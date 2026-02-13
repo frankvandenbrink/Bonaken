@@ -1,75 +1,89 @@
-import type { Card, Player } from 'shared';
+import type { Card, Player, TableCard } from 'shared';
 import { createDeck, shuffleDeck } from './deck';
 
 interface DealResult {
-  hands: Map<string, Card[]>; // playerId -> cards
+  hands: Map<string, Card[]>;
+  tableCards: TableCard[];
   sleepingCards: Card[];
 }
 
 /**
- * Bereken hoeveel kaarten per speler en hoeveel slapende kaarten
- * Gebaseerd op het aantal spelers
+ * Leimuiden kaartdistributie
+ * Altijd 6 kaarten per speler (max 5 spelers)
+ * 2 open + 0-1 blind op tafel, rest slaapt
  */
-export function getCardDistribution(playerCount: number): { cardsPerPlayer: number; sleepingCards: number } {
-  // 32 kaarten totaal
-  // 2 spelers: 16 elk, 0 slapend
-  // 3 spelers: 10 elk, 2 slapend
-  // 4 spelers: 8 elk, 0 slapend
-  // 5 spelers: 6 elk, 2 slapend
-  // 6 spelers: 5 elk, 2 slapend
-  // 7 spelers: 4 elk, 4 slapend
-
-  const distributions: Record<number, { cardsPerPlayer: number; sleepingCards: number }> = {
-    2: { cardsPerPlayer: 16, sleepingCards: 0 },
-    3: { cardsPerPlayer: 10, sleepingCards: 2 },
-    4: { cardsPerPlayer: 8, sleepingCards: 0 },
-    5: { cardsPerPlayer: 6, sleepingCards: 2 },
-    6: { cardsPerPlayer: 5, sleepingCards: 2 },
-    7: { cardsPerPlayer: 4, sleepingCards: 4 }
+export function getCardDistribution(playerCount: number): {
+  cardsPerPlayer: number;
+  openCards: number;
+  blindCards: number;
+  sleepingCards: number;
+} {
+  const distributions: Record<number, {
+    cardsPerPlayer: number;
+    openCards: number;
+    blindCards: number;
+    sleepingCards: number;
+  }> = {
+    2: { cardsPerPlayer: 6, openCards: 2, blindCards: 1, sleepingCards: 17 },
+    3: { cardsPerPlayer: 6, openCards: 2, blindCards: 1, sleepingCards: 11 },
+    4: { cardsPerPlayer: 6, openCards: 2, blindCards: 1, sleepingCards: 5 },
+    5: { cardsPerPlayer: 6, openCards: 2, blindCards: 0, sleepingCards: 0 },
   };
 
   return distributions[playerCount] || distributions[4];
 }
 
 /**
- * Deel kaarten uit aan alle spelers
- * Returns een map van playerId -> kaarten en eventuele slapende kaarten
+ * Deel kaarten uit volgens Leimuiden regels
+ * Per 3 kaarten: ieder 3, dan open+blind op tafel, dan ieder weer 3
  */
 export function dealCards(players: Player[]): DealResult {
   const deck = shuffleDeck(createDeck());
   const playerCount = players.length;
-  const { cardsPerPlayer, sleepingCards: sleepingCount } = getCardDistribution(playerCount);
+  const { cardsPerPlayer, openCards, blindCards, sleepingCards: sleepingCount } = getCardDistribution(playerCount);
 
   const hands = new Map<string, Card[]>();
   let cardIndex = 0;
 
-  // Deel kaarten aan elke speler
+  // Initialiseer handen
   for (const player of players) {
-    const hand = deck.slice(cardIndex, cardIndex + cardsPerPlayer);
-    hands.set(player.id, hand);
-    cardIndex += cardsPerPlayer;
+    hands.set(player.id, []);
   }
 
-  // Resterende kaarten zijn slapend
+  // Eerste ronde: 3 kaarten per speler
+  for (const player of players) {
+    const hand = hands.get(player.id)!;
+    hand.push(...deck.slice(cardIndex, cardIndex + 3));
+    cardIndex += 3;
+  }
+
+  // Tafelkaarten: open kaarten
+  const tableCards: TableCard[] = [];
+  for (let i = 0; i < openCards; i++) {
+    tableCards.push({ card: deck[cardIndex], faceUp: true });
+    cardIndex++;
+  }
+
+  // Tafelkaarten: blinde kaarten
+  for (let i = 0; i < blindCards; i++) {
+    tableCards.push({ card: deck[cardIndex], faceUp: false });
+    cardIndex++;
+  }
+
+  // Tweede ronde: resterende kaarten per speler (tot cardsPerPlayer bereikt)
+  const remainingPerPlayer = cardsPerPlayer - 3;
+  for (const player of players) {
+    const hand = hands.get(player.id)!;
+    hand.push(...deck.slice(cardIndex, cardIndex + remainingPerPlayer));
+    cardIndex += remainingPerPlayer;
+  }
+
+  // Slapende kaarten (doen niet mee)
   const sleepingCards = deck.slice(cardIndex, cardIndex + sleepingCount);
 
   return {
     hands,
+    tableCards,
     sleepingCards
   };
-}
-
-/**
- * Wijs slapende kaarten toe aan de bonaker
- * De bonaker krijgt alle slapende kaarten erbij
- */
-export function assignSleepingCards(
-  hands: Map<string, Card[]>,
-  sleepingCards: Card[],
-  bonakerId: string
-): void {
-  const bonakerHand = hands.get(bonakerId);
-  if (bonakerHand && sleepingCards.length > 0) {
-    bonakerHand.push(...sleepingCards);
-  }
 }

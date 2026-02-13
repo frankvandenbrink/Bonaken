@@ -2,16 +2,24 @@ import { useState, useEffect } from 'react';
 import { useGame } from '../contexts/GameContext';
 import styles from './GameEnd.module.css';
 
+const STATUS_LABELS: Record<string, string> = {
+  suf: 'Suf',
+  krom: 'Krom',
+  recht: 'Recht',
+  wip: 'Wip',
+  erin: 'Erin',
+  eruit: 'Eruit'
+};
+
 /**
  * GameEnd - Theatrical finale screen with Victorian casino aesthetics
- * Shows final scores, highlights the loser, and offers rematch
+ * Shows final statuses, highlights erin/eruit players, and offers rematch
  */
 export function GameEnd() {
   const {
     players,
-    gameScores,
+    playerStatuses,
     playerId,
-    loserId,
     rematchRequests,
     requestRematch,
     leaveGame
@@ -38,16 +46,17 @@ export function GameEnd() {
     }
   }, [playerId, rematchRequests]);
 
-  // Sort players by score (lowest first = winners)
+  // Sort players: eruit first (winners), then others, erin last (losers)
+  const statusOrder: Record<string, number> = { eruit: 0, recht: 1, wip: 2, suf: 3, krom: 4, erin: 5 };
   const rankedPlayers = [...players].sort((a, b) => {
-    const scoreA = gameScores[a.id] ?? a.score;
-    const scoreB = gameScores[b.id] ?? b.score;
-    return scoreA - scoreB;
+    const statusA = playerStatuses[a.id] || a.status;
+    const statusB = playerStatuses[b.id] || b.status;
+    return (statusOrder[statusA] ?? 3) - (statusOrder[statusB] ?? 3);
   });
 
-  // Find the loser using loserId from server
-  const loser = players.find(p => p.id === loserId);
-  const isCurrentPlayerLoser = loserId === playerId;
+  // Find current player's status
+  const myStatus = playerId ? (playerStatuses[playerId] || '') : '';
+  const isCurrentPlayerLoser = myStatus === 'erin';
 
   const handleRematch = () => {
     if (!hasRequestedRematch) {
@@ -100,8 +109,8 @@ export function GameEnd() {
             </h1>
             <p className={styles.subtitle}>
               {isCurrentPlayerLoser
-                ? 'Je hebt 10 punten bereikt'
-                : `${loser?.nickname} heeft verloren!`}
+                ? 'Je bent erin! Rondje geven!'
+                : 'Het spel is afgelopen!'}
             </p>
             <div className={styles.headerOrnament}>— ✦ —</div>
           </header>
@@ -111,15 +120,15 @@ export function GameEnd() {
             <div className={styles.scoreboardHeader}>
               <span className={styles.colRank}>#</span>
               <span className={styles.colName}>Speler</span>
-              <span className={styles.colScore}>Punten</span>
+              <span className={styles.colScore}>Status</span>
             </div>
 
             <div className={styles.scoreboardBody}>
               {rankedPlayers.map((player, index) => {
-                const score = gameScores[player.id] ?? player.score;
-                const isLoser = player.id === loserId;
+                const status = playerStatuses[player.id] || player.status;
+                const isLoser = status === 'erin';
+                const isWinner = status === 'eruit';
                 const isMe = player.id === playerId;
-                const isWinner = index === 0 && !isLoser;
                 const wantsRematch = rematchRequests.includes(player.id);
 
                 return (
@@ -153,9 +162,9 @@ export function GameEnd() {
                       )}
                     </span>
 
-                    {/* Score */}
+                    {/* Status */}
                     <span className={`${styles.score} ${isLoser ? styles.loserScore : ''}`}>
-                      {score}
+                      {STATUS_LABELS[status] || status}
                       {isLoser && <span className={styles.scoreFire}>🔥</span>}
                     </span>
 
@@ -208,10 +217,10 @@ export function GameEnd() {
       {showScores && (
         <div className={`${styles.verdict} ${isCurrentPlayerLoser ? styles.defeat : styles.victory}`}>
           {isCurrentPlayerLoser ? (
-            <span className={styles.verdictText}>VERLOREN</span>
-          ) : (
-            <span className={styles.verdictText}>GEWONNEN</span>
-          )}
+            <span className={styles.verdictText}>ERIN</span>
+          ) : myStatus === 'eruit' ? (
+            <span className={styles.verdictText}>ERUIT</span>
+          ) : null}
         </div>
       )}
     </div>

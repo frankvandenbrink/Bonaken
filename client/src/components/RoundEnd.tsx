@@ -2,19 +2,24 @@ import { useState, useEffect } from 'react';
 import { useGame } from '../contexts/GameContext';
 import styles from './RoundEnd.module.css';
 
+const STATUS_LABELS: Record<string, string> = {
+  suf: 'Suf',
+  krom: 'Krom',
+  recht: 'Recht',
+  wip: 'Wip',
+  erin: 'Erin',
+  eruit: 'Eruit'
+};
+
 /**
  * RoundEnd - Theatrical round summary with scoring reveal
- * Shows tricks won, bonaken result, and score changes
+ * Shows bid result, trick points, and status transitions
  */
 export function RoundEnd() {
   const {
     players,
-    roundScores,
-    gameScores,
-    bonakenSucceeded,
-    bonaker,
+    roundResult,
     playerId,
-    isHost
   } = useGame();
 
   const [countdown, setCountdown] = useState(5);
@@ -35,14 +40,9 @@ export function RoundEnd() {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  const bonakerPlayer = bonaker ? players.find(p => p.id === bonaker) : null;
-
-  // Sort players by tricks won (descending)
-  const sortedPlayers = [...players].sort((a, b) => b.tricksWon - a.tricksWon);
-
-  // Calculate total tricks for majority display
-  const totalTricks = players.reduce((sum, p) => sum + p.tricksWon, 0);
-  const majorityNeeded = Math.floor(totalTricks / 2) + 1;
+  const bidWinnerPlayer = roundResult
+    ? players.find(p => p.id === roundResult.bidWinner)
+    : null;
 
   return (
     <div className={styles.container}>
@@ -61,49 +61,28 @@ export function RoundEnd() {
           <div className={styles.headerLine} />
         </header>
 
-        {/* Bonaken Result Banner */}
-        <div className={`${styles.bonakenBanner} ${
-          bonakenSucceeded === true ? styles.success :
-          bonakenSucceeded === false ? styles.failed :
-          styles.neutral
-        }`}>
-          {bonakenSucceeded === true && (
-            <>
-              <span className={styles.resultIcon}>★</span>
-              <span className={styles.resultText}>
-                <strong>{bonakerPlayer?.nickname}</strong> heeft succesvol gebonaakt!
-              </span>
-              <span className={styles.resultIcon}>★</span>
-            </>
-          )}
-          {bonakenSucceeded === false && (
-            <>
-              <span className={styles.resultIcon}>✗</span>
-              <span className={styles.resultText}>
-                <strong>{bonakerPlayer?.nickname}</strong> is mislukt met bonaken!
-              </span>
-              <span className={styles.resultIcon}>✗</span>
-            </>
-          )}
-          {bonakenSucceeded === null && (
-            <span className={styles.resultText}>Niemand heeft gebonaakt</span>
-          )}
-        </div>
-
-        {/* Majority info for bonaker */}
-        {bonaker && (
-          <div className={styles.majorityInfo}>
-            <span className={styles.majorityLabel}>Meerderheid nodig:</span>
-            <span className={styles.majorityValue}>{majorityNeeded} slagen</span>
-            <span className={styles.majorityDivider}>|</span>
-            <span className={styles.majorityLabel}>Behaald:</span>
-            <span className={`${styles.majorityValue} ${
-              bonakerPlayer && bonakerPlayer.tricksWon >= majorityNeeded
-                ? styles.majoritySuccess
-                : styles.majorityFailed
-            }`}>
-              {bonakerPlayer?.tricksWon} slagen
-            </span>
+        {/* Bid Result Banner */}
+        {roundResult && (
+          <div className={`${styles.bonakenBanner} ${
+            roundResult.bidAchieved ? styles.success : styles.failed
+          }`}>
+            {roundResult.bidAchieved ? (
+              <>
+                <span className={styles.resultIcon}>★</span>
+                <span className={styles.resultText}>
+                  <strong>{bidWinnerPlayer?.nickname}</strong> haalt het bod van {roundResult.bid.amount}!
+                </span>
+                <span className={styles.resultIcon}>★</span>
+              </>
+            ) : (
+              <>
+                <span className={styles.resultIcon}>✗</span>
+                <span className={styles.resultText}>
+                  <strong>{bidWinnerPlayer?.nickname}</strong> haalt het bod van {roundResult.bid.amount} niet!
+                </span>
+                <span className={styles.resultIcon}>✗</span>
+              </>
+            )}
           </div>
         )}
 
@@ -111,53 +90,56 @@ export function RoundEnd() {
         <div className={styles.resultsTable}>
           <div className={styles.tableHeader}>
             <span className={styles.colPlayer}>Speler</span>
-            <span className={styles.colTricks}>Slagen</span>
-            <span className={styles.colRound}>Ronde</span>
-            <span className={styles.colTotal}>Totaal</span>
+            <span className={styles.colTricks}>Punten</span>
+            <span className={styles.colRound}>Resultaat</span>
+            <span className={styles.colTotal}>Status</span>
           </div>
 
           <div className={styles.tableBody}>
-            {sortedPlayers.map((player, index) => {
-              const roundScore = roundScores?.[player.id] ?? 0;
-              const totalScore = gameScores[player.id] ?? player.score;
+            {players.map((player, index) => {
+              const result = roundResult?.playerResults[player.id];
               const isMe = player.id === playerId;
-              const isBonaker = player.id === bonaker;
-              const isDanger = totalScore >= 8;
-              const gotPoints = roundScore > 0;
+              const isBidWinner = player.id === roundResult?.bidWinner;
+              const won = result?.won ?? false;
+              const isEliminated = result?.newStatus === 'erin';
+              const isSafe = result?.newStatus === 'eruit';
 
               return (
                 <div
                   key={player.id}
-                  className={`${styles.tableRow} ${isMe ? styles.isMe : ''} ${isDanger ? styles.isDanger : ''}`}
+                  className={`${styles.tableRow} ${isMe ? styles.isMe : ''} ${isEliminated ? styles.isDanger : ''}`}
                   style={{ animationDelay: `${0.5 + index * 0.15}s` }}
                 >
                   <span className={styles.colPlayer}>
                     <span className={styles.playerRank}>#{index + 1}</span>
                     <span className={styles.playerName}>
                       {player.nickname}
-                      {isBonaker && <span className={styles.bonakerBadge}>B</span>}
+                      {isBidWinner && <span className={styles.bonakerBadge}>B</span>}
                       {isMe && <span className={styles.meBadge}>jij</span>}
                     </span>
                   </span>
 
                   <span className={styles.colTricks}>
-                    <span className={styles.tricksValue}>{player.tricksWon}</span>
+                    <span className={styles.tricksValue}>
+                      {result?.trickPoints ?? 0}pt
+                      {(result?.roem ?? 0) > 0 && ` +${result?.roem}r`}
+                    </span>
                   </span>
 
                   <span className={styles.colRound}>
-                    {gotPoints ? (
-                      <span className={styles.pointsGained}>+{roundScore}</span>
+                    {won ? (
+                      <span className={styles.noPoints} style={{ color: '#4caf50' }}>Gewonnen</span>
                     ) : (
-                      <span className={styles.noPoints}>—</span>
+                      <span className={styles.pointsGained} style={{ color: '#c41e3a' }}>Verloren</span>
                     )}
                   </span>
 
                   <span className={styles.colTotal}>
-                    <span className={`${styles.totalScore} ${isDanger ? styles.dangerScore : ''}`}>
-                      {totalScore}
-                      {isDanger && <span className={styles.dangerIcon}>⚠</span>}
+                    <span className={`${styles.totalScore} ${isEliminated ? styles.dangerScore : ''} ${isSafe ? styles.safeScore : ''}`}>
+                      {result ? `${STATUS_LABELS[result.oldStatus]} → ${STATUS_LABELS[result.newStatus]}` : STATUS_LABELS[player.status]}
+                      {isEliminated && <span className={styles.dangerIcon}>⚠</span>}
+                      {isSafe && ' ✓'}
                     </span>
-                    <span className={styles.maxScore}>/10</span>
                   </span>
                 </div>
               );
@@ -169,15 +151,19 @@ export function RoundEnd() {
         <div className={styles.legend}>
           <span className={styles.legendItem}>
             <span className={styles.legendDot} style={{ background: '#d4af37' }} />
-            Bonaker
+            Bieder
           </span>
           <span className={styles.legendItem}>
             <span className={styles.legendDot} style={{ background: '#c41e3a' }} />
-            Bijna verloren (8+)
+            Erin (verloren)
+          </span>
+          <span className={styles.legendItem}>
+            <span className={styles.legendDot} style={{ background: '#4caf50' }} />
+            Eruit (veilig)
           </span>
         </div>
 
-        {/* Footer with countdown/button */}
+        {/* Footer with countdown */}
         <footer className={styles.footer}>
           <div className={styles.countdownContainer}>
             <div className={styles.countdownRing}>

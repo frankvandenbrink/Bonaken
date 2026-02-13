@@ -1,17 +1,13 @@
-import type { GameState, Player, GameSettings, GamePhase, Card } from 'shared';
-import { generateGameCode } from '../utils/codeGenerator';
-import { dealCards, getCardDistribution } from './dealing';
+import type { GameState, Player, GameSettings, Card, AvailableGame, TableCard } from 'shared';
+import { dealCards } from './dealing';
+import { randomUUID } from 'crypto';
 
 export class GameManager {
   private games: Map<string, GameState> = new Map();
-  private playerToGame: Map<string, string> = new Map(); // socketId -> gameCode
+  private playerToGame: Map<string, string> = new Map(); // socketId -> gameId
 
   createGame(hostId: string, hostNickname: string, settings: GameSettings): GameState {
-    let code = generateGameCode();
-    // Zorg dat code uniek is
-    while (this.games.has(code)) {
-      code = generateGameCode();
-    }
+    const id = randomUUID().slice(0, 8);
 
     const host: Player = {
       id: hostId,
@@ -19,47 +15,72 @@ export class GameManager {
       isHost: true,
       isConnected: true,
       hand: [],
-      score: 0,
-      tricksWon: 0
+      status: 'suf',
+      tricksWon: 0,
+      trickPoints: 0,
+      declaredRoem: 0,
+      hasPassed: false
     };
 
     const game: GameState = {
-      code,
+      id,
+      name: settings.gameName,
       phase: 'lobby',
       players: [host],
       settings,
       currentDealer: hostId,
       currentTurn: null,
       trump: null,
-      bonaker: null,
-      bonakenChoices: [],
+      currentBid: null,
+      bidWinner: null,
+      biddingOrder: [],
+      tableCards: [],
       currentTrick: [],
       roundNumber: 0,
       lastActivity: Date.now(),
       sleepingCards: [],
+      roemDeclarations: [],
+      turnDeadline: null,
       rematchRequests: []
     };
 
-    this.games.set(code, game);
-    this.playerToGame.set(hostId, code);
+    this.games.set(id, game);
+    this.playerToGame.set(hostId, id);
 
     return game;
   }
 
-  getGame(code: string): GameState | undefined {
-    return this.games.get(code.toUpperCase());
+  getGame(id: string): GameState | undefined {
+    return this.games.get(id);
   }
 
   getGameByPlayerId(playerId: string): GameState | undefined {
-    const code = this.playerToGame.get(playerId);
-    if (code) {
-      return this.games.get(code);
+    const id = this.playerToGame.get(playerId);
+    if (id) {
+      return this.games.get(id);
     }
     return undefined;
   }
 
-  joinGame(code: string, playerId: string, nickname: string): { success: boolean; error?: string; game?: GameState } {
-    const game = this.games.get(code.toUpperCase());
+  getAvailableGames(): AvailableGame[] {
+    const available: AvailableGame[] = [];
+    for (const game of this.games.values()) {
+      if (game.phase === 'lobby' && game.players.length < game.settings.maxPlayers) {
+        const host = game.players.find(p => p.isHost);
+        available.push({
+          id: game.id,
+          name: game.name,
+          playerCount: game.players.length,
+          maxPlayers: game.settings.maxPlayers,
+          hostNickname: host?.nickname ?? 'Onbekend'
+        });
+      }
+    }
+    return available;
+  }
+
+  joinGame(gameId: string, playerId: string, nickname: string): { success: boolean; error?: string; game?: GameState } {
+    const game = this.games.get(gameId);
 
     if (!game) {
       return { success: false, error: 'Spel niet gevonden' };
@@ -73,7 +94,6 @@ export class GameManager {
       return { success: false, error: 'Spel is vol' };
     }
 
-    // Check voor dubbele nickname
     if (game.players.some(p => p.nickname.toLowerCase() === nickname.toLowerCase())) {
       return { success: false, error: 'Deze naam is al in gebruik' };
     }
@@ -84,19 +104,22 @@ export class GameManager {
       isHost: false,
       isConnected: true,
       hand: [],
-      score: 0,
-      tricksWon: 0
+      status: 'suf',
+      tricksWon: 0,
+      trickPoints: 0,
+      declaredRoem: 0,
+      hasPassed: false
     };
 
     game.players.push(player);
     game.lastActivity = Date.now();
-    this.playerToGame.set(playerId, code.toUpperCase());
+    this.playerToGame.set(playerId, gameId);
 
     return { success: true, game };
   }
 
-  updateSettings(code: string, playerId: string, settings: GameSettings): { success: boolean; error?: string } {
-    const game = this.games.get(code);
+  updateSettings(gameId: string, playerId: string, settings: GameSettings): { success: boolean; error?: string } {
+    const game = this.games.get(gameId);
     if (!game) {
       return { success: false, error: 'Spel niet gevonden' };
     }
@@ -107,12 +130,13 @@ export class GameManager {
     }
 
     game.settings = settings;
+    game.name = settings.gameName;
     game.lastActivity = Date.now();
     return { success: true };
   }
 
-  canStartGame(code: string, playerId: string): { canStart: boolean; error?: string } {
-    const game = this.games.get(code);
+  canStartGame(gameId: string, playerId: string): { canStart: boolean; error?: string } {
+    const game = this.games.get(gameId);
     if (!game) {
       return { canStart: false, error: 'Spel niet gevonden' };
     }
@@ -122,23 +146,21 @@ export class GameManager {
       return { canStart: false, error: 'Alleen de host kan het spel starten' };
     }
 
-    if (game.players.length < game.settings.minPlayers) {
-      return { canStart: false, error: `Minimaal ${game.settings.minPlayers} spelers nodig` };
+    if (game.players.length < 2) {
+      return { canStart: false, error: 'Minimaal 2 spelers nodig' };
     }
 
     return { canStart: true };
   }
 
-  startGame(code: string): { game?: GameState; hands?: Map<string, Card[]> } {
-    const game = this.games.get(code);
+  startGame(gameId: string): { game?: GameState; hands?: Map<string, Card[]>; tableCards?: TableCard[] } {
+    const game = this.games.get(gameId);
     if (!game) {
       return {};
     }
 
-    // Deal cards to all players
-    const { hands, sleepingCards } = dealCards(game.players);
+    const { hands, tableCards, sleepingCards } = dealCards(game.players);
 
-    // Assign hands to players
     for (const player of game.players) {
       const hand = hands.get(player.id);
       if (hand) {
@@ -146,30 +168,22 @@ export class GameManager {
       }
     }
 
-    // Store sleeping cards
+    game.tableCards = tableCards;
     game.sleepingCards = sleepingCards;
-
-    // Initialize bonaken choices
-    game.bonakenChoices = game.players.map(p => ({
-      playerId: p.id,
-      choice: null
-    }));
-
-    // Move to bonaken phase
-    game.phase = 'bonaken';
+    game.phase = 'bidding';
     game.roundNumber = 1;
     game.lastActivity = Date.now();
 
-    return { game, hands };
+    return { game, hands, tableCards };
   }
 
   removePlayer(playerId: string): { game?: GameState; wasHost: boolean; isEmpty: boolean } {
-    const code = this.playerToGame.get(playerId);
-    if (!code) {
+    const gameId = this.playerToGame.get(playerId);
+    if (!gameId) {
       return { wasHost: false, isEmpty: false };
     }
 
-    const game = this.games.get(code);
+    const game = this.games.get(gameId);
     if (!game) {
       this.playerToGame.delete(playerId);
       return { wasHost: false, isEmpty: false };
@@ -185,13 +199,11 @@ export class GameManager {
     game.players.splice(playerIndex, 1);
     this.playerToGame.delete(playerId);
 
-    // Als spel leeg is, verwijder het
     if (game.players.length === 0) {
-      this.games.delete(code);
+      this.games.delete(gameId);
       return { wasHost, isEmpty: true };
     }
 
-    // Als host vertrok, maak eerste speler host
     if (wasHost && game.players.length > 0) {
       game.players[0].isHost = true;
     }
@@ -212,19 +224,17 @@ export class GameManager {
     return game;
   }
 
-  // Cleanup inactieve games (ouder dan 5 minuten)
   cleanupInactiveGames(): number {
     const now = Date.now();
     const fiveMinutes = 5 * 60 * 1000;
     let cleaned = 0;
 
-    for (const [code, game] of this.games) {
+    for (const [id, game] of this.games) {
       if (now - game.lastActivity > fiveMinutes) {
-        // Verwijder player mappings
         for (const player of game.players) {
           this.playerToGame.delete(player.id);
         }
-        this.games.delete(code);
+        this.games.delete(id);
         cleaned++;
       }
     }

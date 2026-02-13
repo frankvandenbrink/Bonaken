@@ -1,0 +1,93 @@
+/* RoemIndicator.module.css - Compact roem display */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+  animation: roemAppear 0.4s ease;
+}
+
+@keyframes roemAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.icon {
+  color: var(--gold);
+  font-size: 0.9rem;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.declarations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.playerRoem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.playerRoem:last-child {
+  border-bottom: none;
+}
+
+.playerName {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--cream);
+  font-weight: 500;
+  min-width: 70px;
+}
+
+.roemList {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.roemItem {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: rgba(245, 245, 220, 0.7);
+  padding: 0.1rem 0.4rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.totalPoints {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--gold);
+  font-weight: 600;
+  min-width: 40px;
+  text-align: right;
+}

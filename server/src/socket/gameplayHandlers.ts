@@ -1,19 +1,23 @@
 import { Server, Socket } from 'socket.io';
 import type { ServerToClientEvents, ClientToServerEvents, GameState, PlayedCard } from 'shared';
+import { getTrickPoints } from 'shared';
 import { gameManager } from '../game/GameManager';
 import { isValidCard, getValidCardIds } from '../game/cardValidation';
 import { getTrickWinnerId } from '../game/trickWinner';
-import { getNextPlayer, getFirstPlayer, getMajorityThreshold } from '../game/turnManager';
+import { getNextPlayer } from '../game/turnManager';
+import { initBiddingState } from '../game/bidding';
+import { dealCards } from '../game/dealing';
+import { determineRoundResult, isGameComplete } from '../game/scoring';
+import { startTimer, cancelTimer } from '../game/timer';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
-// Delay constants
-const TRICK_DISPLAY_DELAY = 2500; // 2.5 seconden om slag te bekijken
-const ROUND_END_DELAY = 1500; // 1.5 seconden voor ronde-einde
+const TRICK_DISPLAY_DELAY = 2500;
+const ROUND_END_DELAY = 1500;
 
 /**
- * Start een beurt voor een speler
+ * Start een beurt voor een speler, inclusief timer
  */
 export function startTurn(io: TypedServer, game: GameState, playerId: string) {
   const player = game.players.find(p => p.id === playerId);
@@ -24,15 +28,58 @@ export function startTurn(io: TypedServer, game: GameState, playerId: string) {
 
   console.log(`Beurt van ${player.nickname}, ${validCardIds.length} geldige kaarten`);
 
-  io.to(game.code).emit('turn-start', {
+  // Start timer als geconfigureerd
+  const seconds = game.settings.turnTimerSeconds;
+  if (seconds) {
+    const deadline = startTimer(game.id, seconds, () => {
+      // Auto-play: speel willekeurige geldige kaart
+      if (game.phase === 'playing' && game.currentTurn === playerId) {
+        const currentValidIds = getValidCardIds(player.hand, game.currentTrick, game.trump);
+        if (currentValidIds.length > 0) {
+          const randomCardId = currentValidIds[Math.floor(Math.random() * currentValidIds.length)];
+          game.turnDeadline = null;
+
+          io.to(game.id).emit('timer-expired', { playerId, autoAction: 'auto-kaart' });
+
+          // Speel de kaart
+          const cardIndex = player.hand.findIndex(c => c.id === randomCardId);
+          if (cardIndex !== -1) {
+            const card = player.hand[cardIndex];
+            player.hand.splice(cardIndex, 1);
+
+            const playedCard: PlayedCard = { playerId, card };
+            game.currentTrick.push(playedCard);
+
+            console.log(`${player.nickname} speelt auto: ${card.rank} ${card.suit}`);
+            io.to(game.id).emit('card-played', { playerId, card });
+
+            const activePlayers = game.players.filter(p => p.status !== 'erin' && p.status !== 'eruit');
+            if (game.currentTrick.length === activePlayers.length) {
+              handleTrickComplete(io, game);
+            } else {
+              const nextPlayer = getNextActivePlayer(game, playerId);
+              if (nextPlayer) {
+                startTurn(io, game, nextPlayer.id);
+              }
+            }
+
+            game.lastActivity = Date.now();
+          }
+        }
+      }
+    });
+    game.turnDeadline = deadline;
+  } else {
+    game.turnDeadline = null;
+  }
+
+  io.to(game.id).emit('turn-start', {
     playerId,
-    validCardIds
+    validCardIds,
+    deadline: game.turnDeadline
   });
 }
 
-/**
- * Verwerk een gespeelde kaart
- */
 function handlePlayCard(
   io: TypedServer,
   socket: TypedSocket,
@@ -45,7 +92,6 @@ function handlePlayCard(
     return;
   }
 
-  // Vind de kaart in de hand
   const cardIndex = player.hand.findIndex(c => c.id === cardId);
   if (cardIndex === -1) {
     socket.emit('error', { message: 'Kaart niet in hand' });
@@ -54,153 +100,115 @@ function handlePlayCard(
 
   const card = player.hand[cardIndex];
 
-  // Valideer of kaart gespeeld mag worden
   if (!isValidCard(cardId, player.hand, game.currentTrick, game.trump)) {
     socket.emit('error', { message: 'Deze kaart mag niet gespeeld worden' });
     return;
   }
 
-  // Verwijder kaart uit hand
+  cancelTimer(game.id);
+  game.turnDeadline = null;
+
   player.hand.splice(cardIndex, 1);
 
-  // Voeg toe aan huidige slag
-  const playedCard: PlayedCard = {
-    playerId: socket.id,
-    card
-  };
+  const playedCard: PlayedCard = { playerId: socket.id, card };
   game.currentTrick.push(playedCard);
 
   console.log(`${player.nickname} speelt ${card.rank} ${card.suit}`);
 
-  // Broadcast naar alle spelers
-  io.to(game.code).emit('card-played', {
-    playerId: socket.id,
-    card
-  });
+  io.to(game.id).emit('card-played', { playerId: socket.id, card });
 
-  // Check of slag compleet is
-  if (game.currentTrick.length === game.players.length) {
+  // Check of slag compleet is (alle actieve spelers)
+  const activePlayers = game.players.filter(p => p.status !== 'erin' && p.status !== 'eruit');
+  if (game.currentTrick.length === activePlayers.length) {
     handleTrickComplete(io, game);
   } else {
-    // Volgende speler aan de beurt
-    const nextPlayer = getNextPlayer(game.players, socket.id);
-    startTurn(io, game, nextPlayer.id);
+    const nextPlayer = getNextActivePlayer(game, socket.id);
+    if (nextPlayer) {
+      startTurn(io, game, nextPlayer.id);
+    }
   }
 
   game.lastActivity = Date.now();
 }
 
 /**
- * Verwerk een complete slag
+ * Krijg de volgende actieve speler (niet erin/eruit)
  */
+function getNextActivePlayer(game: GameState, currentPlayerId: string) {
+  const currentIndex = game.players.findIndex(p => p.id === currentPlayerId);
+  for (let i = 1; i <= game.players.length; i++) {
+    const nextIndex = (currentIndex + i) % game.players.length;
+    const nextPlayer = game.players[nextIndex];
+    if (nextPlayer.status !== 'erin' && nextPlayer.status !== 'eruit') {
+      return nextPlayer;
+    }
+  }
+  return null;
+}
+
 function handleTrickComplete(io: TypedServer, game: GameState) {
   const winnerId = getTrickWinnerId(game.currentTrick, game.trump);
   const winner = game.players.find(p => p.id === winnerId);
 
+  // Bereken kaartpunten van deze slag
+  const trickPts = getTrickPoints(game.currentTrick, game.trump);
+
   if (winner) {
     winner.tricksWon++;
-    console.log(`${winner.nickname} wint de slag (${winner.tricksWon} slagen totaal)`);
+    winner.trickPoints += trickPts;
+    console.log(`${winner.nickname} wint de slag (${trickPts} punten, ${winner.tricksWon} slagen totaal)`);
   }
 
-  // Collect tricksWon for all players
   const tricksWon: Record<string, number> = {};
   game.players.forEach(p => {
     tricksWon[p.id] = p.tricksWon;
   });
 
-  // Emit trick complete with updated scores
-  io.to(game.code).emit('trick-complete', { winnerId, tricksWon });
+  io.to(game.id).emit('trick-complete', { winnerId, trickPoints: trickPts, tricksWon });
 
-  // Wacht even zodat spelers de slag kunnen zien
   setTimeout(() => {
-    // Clear de slag
     game.currentTrick = [];
-    io.to(game.code).emit('trick-cleared');
+    io.to(game.id).emit('trick-cleared');
 
-    // Check of ronde voorbij is (alle kaarten gespeeld)
-    const allCardsPlayed = game.players.every(p => p.hand.length === 0);
+    const activePlayers = game.players.filter(p => p.status !== 'erin' && p.status !== 'eruit');
+    const allCardsPlayed = activePlayers.every(p => p.hand.length === 0);
 
     if (allCardsPlayed) {
       handleRoundComplete(io, game);
     } else {
-      // Winnaar begint volgende slag
       startTurn(io, game, winnerId);
     }
   }, TRICK_DISPLAY_DELAY);
 }
 
-/**
- * Verwerk het einde van een ronde
- */
 function handleRoundComplete(io: TypedServer, game: GameState) {
   console.log('Ronde compleet!');
 
-  // Bereken scores
-  const totalTricks = game.players[0]?.tricksWon !== undefined
-    ? game.players.reduce((sum, p) => sum + p.tricksWon, 0)
-    : 0;
+  const bidWinner = game.bidWinner;
+  const bid = game.currentBid;
 
-  const majorityThreshold = getMajorityThreshold(totalTricks);
-  let bonakenSucceeded: boolean | null = null;
-
-  const roundScores: Record<string, number> = {};
-  game.players.forEach(p => {
-    roundScores[p.id] = 0;
-  });
-
-  if (game.bonaker) {
-    // Iemand heeft gebonaakt
-    const bonaker = game.players.find(p => p.id === game.bonaker);
-    if (bonaker) {
-      bonakenSucceeded = bonaker.tricksWon >= majorityThreshold;
-
-      if (bonakenSucceeded) {
-        // Bonaken geslaagd: +1 voor alle anderen
-        console.log(`${bonaker.nickname} heeft succesvol gebonaakt!`);
-        game.players.forEach(p => {
-          if (p.id !== game.bonaker) {
-            roundScores[p.id] = 1;
-            p.score += 1;
-          }
-        });
-      } else {
-        // Bonaken mislukt: +3 voor bonaker
-        console.log(`${bonaker.nickname} is mislukt met bonaken!`);
-        roundScores[game.bonaker] = 3;
-        bonaker.score += 3;
-      }
-    }
-  } else {
-    // Niemand heeft gebonaakt: +1 voor speler(s) met minste slagen
-    const minTricks = Math.min(...game.players.map(p => p.tricksWon));
-    game.players.forEach(p => {
-      if (p.tricksWon === minTricks) {
-        roundScores[p.id] = 1;
-        p.score += 1;
-      }
-    });
-    console.log(`Niemand bonakte, spelers met ${minTricks} slagen krijgen +1`);
+  if (!bidWinner || !bid) {
+    startNextRound(io, game);
+    return;
   }
 
-  // Emit round scores
-  io.to(game.code).emit('round-scores', {
-    scores: roundScores,
-    bonakenSucceeded
-  });
+  // Gebruik scoring module voor ronde-resultaat
+  const result = determineRoundResult(
+    game.players,
+    bidWinner,
+    bid,
+    game.trump,
+    game.roemDeclarations
+  );
 
-  // Emit updated game scores
-  const gameScores: Record<string, number> = {};
-  game.players.forEach(p => {
-    gameScores[p.id] = p.score;
-  });
-  io.to(game.code).emit('game-scores', { scores: gameScores });
+  game.phase = 'round-end';
 
-  // Check of iemand 10+ punten heeft (verloren)
-  const loser = game.players.find(p => p.score >= 10);
-  if (loser) {
-    handleGameEnd(io, game, loser.id);
+  io.to(game.id).emit('round-result', result);
+
+  // Check of spel voorbij is
+  if (isGameComplete(game.players)) {
+    handleGameEnd(io, game);
   } else {
-    // Start volgende ronde na korte delay
     setTimeout(() => {
       startNextRound(io, game);
     }, ROUND_END_DELAY);
@@ -209,144 +217,136 @@ function handleRoundComplete(io: TypedServer, game: GameState) {
   game.lastActivity = Date.now();
 }
 
-/**
- * Verwerk het einde van het spel
- */
-function handleGameEnd(io: TypedServer, game: GameState, loserId: string) {
+function handleGameEnd(io: TypedServer, game: GameState) {
+  cancelTimer(game.id);
+  game.turnDeadline = null;
   game.phase = 'game-end';
 
-  const finalScores: Record<string, number> = {};
+  const playerStatuses: Record<string, import('shared').PlayerStatus> = {};
   game.players.forEach(p => {
-    finalScores[p.id] = p.score;
+    playerStatuses[p.id] = p.status;
   });
 
-  const loser = game.players.find(p => p.id === loserId);
-  console.log(`Spel voorbij! ${loser?.nickname} heeft verloren met ${loser?.score} punten`);
+  console.log('Spel voorbij!', playerStatuses);
 
-  io.to(game.code).emit('game-ended', {
-    loserId,
-    finalScores
-  });
-
+  io.to(game.id).emit('game-ended', { playerStatuses });
   game.lastActivity = Date.now();
 }
 
-/**
- * Reset het spel voor een rematch
- */
-function resetForRematch(game: GameState) {
-  // Reset alle scores
-  game.players.forEach(p => {
-    p.score = 0;
-    p.tricksWon = 0;
-    p.hand = [];
-  });
-
-  // Roteer deler naar volgende speler
-  const currentDealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
-  const nextDealerIndex = (currentDealerIndex + 1) % game.players.length;
-  game.currentDealer = game.players[nextDealerIndex].id;
-
-  // Reset game state
-  game.bonaker = null;
-  game.trump = null;
-  game.currentTrick = [];
-  game.roundNumber = 1;
-  game.rematchRequests = [];
-  game.sleepingCards = [];
-  game.bonakenChoices = [];
-}
-
-/**
- * Verwerk een rematch verzoek
- */
 function handleRematchRequest(io: TypedServer, socket: TypedSocket, game: GameState) {
   const player = game.players.find(p => p.id === socket.id);
   if (!player) return;
 
-  // Voeg toe aan rematch requests als nog niet aanwezig
   if (!game.rematchRequests.includes(socket.id)) {
     game.rematchRequests.push(socket.id);
     console.log(`${player.nickname} wil een rematch (${game.rematchRequests.length}/${game.players.length})`);
 
-    io.to(game.code).emit('rematch-requested', {
+    io.to(game.id).emit('rematch-requested', {
       playerId: socket.id,
       nickname: player.nickname
     });
   }
 
-  // Check of iedereen rematch wil
   if (game.rematchRequests.length === game.players.length) {
     console.log('Iedereen wil rematch - nieuw spel starten!');
     resetForRematch(game);
-    io.to(game.code).emit('rematch-started');
-
-    // Start nieuw spel (kaarten delen etc.)
+    io.to(game.id).emit('rematch-started');
     startNextRound(io, game);
   }
 
   game.lastActivity = Date.now();
 }
 
-/**
- * Start een nieuwe ronde
- */
-function startNextRound(io: TypedServer, game: GameState) {
-  // Roteer deler naar volgende speler
+function resetForRematch(game: GameState) {
+  game.players.forEach(p => {
+    p.status = 'suf';
+    p.tricksWon = 0;
+    p.trickPoints = 0;
+    p.declaredRoem = 0;
+    p.hasPassed = false;
+    p.hand = [];
+  });
+
   const currentDealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
   const nextDealerIndex = (currentDealerIndex + 1) % game.players.length;
   game.currentDealer = game.players[nextDealerIndex].id;
 
-  // Reset tricksWon
-  game.players.forEach(p => {
-    p.tricksWon = 0;
-  });
-
-  // Reset game state voor nieuwe ronde
-  game.bonaker = null;
+  game.bidWinner = null;
+  game.currentBid = null;
   game.trump = null;
   game.currentTrick = [];
+  game.roundNumber = 1;
+  game.rematchRequests = [];
+  game.sleepingCards = [];
+  game.tableCards = [];
+  game.roemDeclarations = [];
+  game.turnDeadline = null;
+}
+
+function startNextRound(io: TypedServer, game: GameState) {
+  // Roteer deler
+  const currentDealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
+  const nextDealerIndex = (currentDealerIndex + 1) % game.players.length;
+  game.currentDealer = game.players[nextDealerIndex].id;
+
+  // Reset voor nieuwe ronde
+  game.players.forEach(p => {
+    p.tricksWon = 0;
+    p.trickPoints = 0;
+    p.declaredRoem = 0;
+    p.hasPassed = false;
+  });
+
+  game.bidWinner = null;
+  game.currentBid = null;
+  game.trump = null;
+  game.currentTrick = [];
+  game.roemDeclarations = [];
   game.roundNumber++;
 
   console.log(`Start ronde ${game.roundNumber}, deler: ${game.players[nextDealerIndex].nickname}`);
 
   // Deal nieuwe kaarten
-  const { dealCards } = require('./lobbyHandlers').default || require('../game/dealing');
-  const { hands, sleepingCards } = require('../game/dealing').dealCards(game.players);
+  const activePlayers = game.players.filter(p => p.status !== 'erin' && p.status !== 'eruit');
+  const { hands, tableCards, sleepingCards } = dealCards(activePlayers);
 
-  // Assign hands to players
-  for (const player of game.players) {
-    const hand = hands.get(player.id);
+  for (const p of activePlayers) {
+    const hand = hands.get(p.id);
     if (hand) {
-      player.hand = hand;
+      p.hand = hand;
     }
   }
+  game.tableCards = tableCards;
   game.sleepingCards = sleepingCards;
 
-  // Send cards to each player
-  for (const player of game.players) {
-    const playerSocket = io.sockets.sockets.get(player.id);
+  // Send cards to each active player
+  for (const p of activePlayers) {
+    const playerSocket = io.sockets.sockets.get(p.id);
     if (playerSocket) {
-      playerSocket.emit('cards-dealt', { hand: player.hand });
+      playerSocket.emit('cards-dealt', {
+        hand: p.hand,
+        tableCards: tableCards.map(tc => ({
+          card: tc.faceUp ? tc.card : { suit: tc.card.suit, rank: tc.card.rank, id: 'blind' },
+          faceUp: tc.faceUp
+        }))
+      });
     }
   }
 
-  // Initialize bonaken choices
-  game.bonakenChoices = game.players.map(p => ({
-    playerId: p.id,
-    choice: null
-  }));
+  // Initialize bidding
+  const biddingState = initBiddingState(activePlayers, game.currentDealer);
+  game.biddingOrder = biddingState.biddingOrder;
+  game.currentTurn = biddingState.firstBidder;
+  game.phase = 'bidding';
 
-  // Go to bonaken phase
-  game.phase = 'bonaken';
-  io.to(game.code).emit('bonaken-phase-start');
+  io.to(game.id).emit('bidding-start', {
+    biddingOrder: biddingState.biddingOrder,
+    firstBidder: biddingState.firstBidder
+  });
 
   game.lastActivity = Date.now();
 }
 
-/**
- * Setup gameplay handlers
- */
 export function setupGameplayHandlers(io: TypedServer, socket: TypedSocket) {
   socket.on('play-card', ({ cardId }) => {
     const game = gameManager.getGameByPlayerId(socket.id);
@@ -386,5 +386,4 @@ export function setupGameplayHandlers(io: TypedServer, socket: TypedSocket) {
   });
 }
 
-// Export startTurn for use in trumpHandlers
 export { startTurn as startPlayerTurn };

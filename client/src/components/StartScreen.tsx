@@ -1,10 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGame } from '../contexts/GameContext';
 import { CreateGameModal } from './CreateGameModal';
-import { JoinGameModal } from './JoinGameModal';
 import styles from './StartScreen.module.css';
 
-// Card suit decorations
 const SuitIcon = ({ suit }: { suit: 'hearts' | 'diamonds' | 'clubs' | 'spades' }) => {
   const symbols = {
     hearts: '♥',
@@ -21,9 +19,17 @@ const SuitIcon = ({ suit }: { suit: 'hearts' | 'diamonds' | 'clubs' | 'spades' }
 };
 
 export function StartScreen() {
-  const { nickname, setNickname, isConnected, error, clearError } = useGame();
+  const { nickname, setNickname, isConnected, error, clearError, availableGames, listGames, joinGame } = useGame();
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showJoinModal, setShowJoinModal] = useState(false);
+
+  // Auto-refresh game list
+  useEffect(() => {
+    if (isConnected) {
+      listGames();
+      const interval = setInterval(listGames, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [isConnected, listGames]);
 
   return (
     <div className={styles.container}>
@@ -74,7 +80,7 @@ export function StartScreen() {
           />
         </div>
 
-        {/* Action buttons */}
+        {/* Create game button */}
         <div className={styles.actions}>
           <button
             className={`${styles.button} ${styles.primaryButton}`}
@@ -84,34 +90,48 @@ export function StartScreen() {
             <span className={styles.buttonIcon}>✦</span>
             <span>Nieuw Spel Starten</span>
           </button>
+        </div>
 
-          <div className={styles.divider}>
-            <span className={styles.dividerLine} />
-            <span className={styles.dividerText}>of</span>
-            <span className={styles.dividerLine} />
-          </div>
-
-          <button
-            className={`${styles.button} ${styles.secondaryButton}`}
-            onClick={() => setShowJoinModal(true)}
-            disabled={!isConnected}
-          >
-            <span>Deelnemen aan Spel</span>
-          </button>
+        {/* Game Browser */}
+        <div className={styles.gameBrowser}>
+          <h2 className={styles.browserTitle}>Beschikbare Spellen</h2>
+          {availableGames.length === 0 ? (
+            <div className={styles.noGames}>
+              <p>Geen open spellen gevonden</p>
+              <p className={styles.noGamesHint}>Start een nieuw spel of wacht tot iemand er een aanmaakt</p>
+            </div>
+          ) : (
+            <ul className={styles.gameList}>
+              {availableGames.map(game => (
+                <li key={game.id} className={styles.gameItem}>
+                  <div className={styles.gameInfo}>
+                    <span className={styles.gameName}>{game.name}</span>
+                    <span className={styles.gameDetails}>
+                      {game.playerCount}/{game.maxPlayers} spelers — Host: {game.hostNickname}
+                    </span>
+                  </div>
+                  <button
+                    className={styles.joinButton}
+                    onClick={() => joinGame(game.id)}
+                    disabled={!isConnected || !nickname.trim()}
+                  >
+                    Deelnemen
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Footer */}
         <footer className={styles.footer}>
-          <p>2-7 spelers • Leimuiden variant</p>
+          <p>2-5 spelers — Leimuiden variant</p>
         </footer>
       </main>
 
       {/* Modals */}
       {showCreateModal && (
         <CreateGameModal onClose={() => setShowCreateModal(false)} />
-      )}
-      {showJoinModal && (
-        <JoinGameModal onClose={() => setShowJoinModal(false)} />
       )}
     </div>
   );

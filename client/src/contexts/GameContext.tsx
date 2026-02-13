@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useSocket } from '../hooks/useSocket';
-import type { GameState, Player, GameSettings, Card, Suit, BonakChoice, PlayedCard } from '@shared/index';
+import type {
+  GameState, Player, GameSettings, Card, Suit, PlayedCard,
+  AvailableGame, Bid, BidType, TableCard, RoemDeclaration, PlayerStatus
+} from '@shared/index';
 
 interface GameContextType {
   // Connection
@@ -12,32 +15,43 @@ interface GameContextType {
   playerId: string | null;
   isHost: boolean;
 
+  // Game Browser
+  availableGames: AvailableGame[];
+  listGames: () => void;
+
   // Game state
-  gameCode: string | null;
+  gameId: string | null;
+  gameName: string | null;
   gamePhase: GameState['phase'] | null;
   players: Player[];
   settings: GameSettings;
   hand: Card[];
   trump: Suit | null;
+  tableCards: TableCard[];
 
-  // Bonaken state
-  bonakenChoices: BonakChoice[];
-  bonaker: string | null;
-  chosenCount: number;
-  hasChosen: boolean;
-  trumpSelector: string | null;
+  // Bidding state
+  currentBid: Bid | null;
+  bidWinner: string | null;
+  biddingOrder: string[];
 
   // Playing state
   currentTurn: string | null;
   currentTrick: PlayedCard[];
   validCardIds: string[];
   trickWinner: string | null;
-  roundScores: Record<string, number> | null;
-  gameScores: Record<string, number>;
-  bonakenSucceeded: boolean | null;
+  turnDeadline: number | null;
 
-  // Game end state
-  loserId: string | null;
+  // Roem
+  roemDeclarations: RoemDeclaration[];
+
+  // Round/Game results
+  roundResult: {
+    bidWinner: string;
+    bid: Bid;
+    bidAchieved: boolean;
+    playerResults: Record<string, { won: boolean; oldStatus: PlayerStatus; newStatus: PlayerStatus; trickPoints: number; roem: number }>;
+  } | null;
+  playerStatuses: Record<string, PlayerStatus>;
 
   // Rematch state
   rematchRequests: string[];
@@ -48,19 +62,23 @@ interface GameContextType {
 
   // Actions
   createGame: (settings: GameSettings) => void;
-  joinGame: (code: string) => void;
+  joinGame: (gameId: string) => void;
   updateSettings: (settings: GameSettings) => void;
   startGame: () => void;
   leaveGame: () => void;
-  makeBonakChoice: (choice: 'bonaken' | 'passen') => void;
+  placeBid: (type: BidType, amount: number) => void;
+  passBid: () => void;
+  swapCards: (discardCardIds: string[]) => void;
   selectTrump: (suit: Suit) => void;
+  declareRoem: (declarations: RoemDeclaration[]) => void;
   playCard: (cardId: string) => void;
   requestRematch: () => void;
 }
 
 const defaultSettings: GameSettings = {
-  minPlayers: 2,
-  maxPlayers: 4
+  maxPlayers: 4,
+  gameName: '',
+  turnTimerSeconds: null
 };
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -74,31 +92,37 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
   const [playerId, setPlayerId] = useState<string | null>(null);
 
+  // Game Browser
+  const [availableGames, setAvailableGames] = useState<AvailableGame[]>([]);
+
   // Game state
-  const [gameCode, setGameCode] = useState<string | null>(null);
+  const [gameId, setGameId] = useState<string | null>(null);
+  const [gameName, setGameName] = useState<string | null>(null);
   const [gamePhase, setGamePhase] = useState<GameState['phase'] | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [settings, setSettings] = useState<GameSettings>(defaultSettings);
   const [hand, setHand] = useState<Card[]>([]);
   const [trump, setTrump] = useState<Suit | null>(null);
+  const [tableCards, setTableCards] = useState<TableCard[]>([]);
 
-  // Bonaken state
-  const [bonakenChoices, setBonakenChoices] = useState<BonakChoice[]>([]);
-  const [bonaker, setBonaker] = useState<string | null>(null);
-  const [chosenCount, setChosenCount] = useState(0);
-  const [trumpSelector, setTrumpSelector] = useState<string | null>(null);
+  // Bidding state
+  const [currentBid, setCurrentBid] = useState<Bid | null>(null);
+  const [bidWinner, setBidWinner] = useState<string | null>(null);
+  const [biddingOrder, setBiddingOrder] = useState<string[]>([]);
 
   // Playing state
   const [currentTurn, setCurrentTurn] = useState<string | null>(null);
   const [currentTrick, setCurrentTrick] = useState<PlayedCard[]>([]);
   const [validCardIds, setValidCardIds] = useState<string[]>([]);
   const [trickWinner, setTrickWinner] = useState<string | null>(null);
-  const [roundScores, setRoundScores] = useState<Record<string, number> | null>(null);
-  const [gameScores, setGameScores] = useState<Record<string, number>>({});
-  const [bonakenSucceeded, setBonakenSucceeded] = useState<boolean | null>(null);
+  const [turnDeadline, setTurnDeadline] = useState<number | null>(null);
 
-  // Game end state
-  const [loserId, setLoserId] = useState<string | null>(null);
+  // Roem
+  const [roemDeclarations, setRoemDeclarations] = useState<RoemDeclaration[]>([]);
+
+  // Round/Game results
+  const [roundResult, setRoundResult] = useState<GameContextType['roundResult']>(null);
+  const [playerStatuses, setPlayerStatuses] = useState<Record<string, PlayerStatus>>({});
 
   // Rematch state
   const [rematchRequests, setRematchRequests] = useState<string[]>([]);
@@ -114,8 +138,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Computed
   const isHost = players.find(p => p.id === playerId)?.isHost ?? false;
-  const hasChosen = bonakenChoices.find(c => c.playerId === playerId)?.choice !== null &&
-                   bonakenChoices.find(c => c.playerId === playerId)?.choice !== undefined;
 
   // Socket event handlers
   useEffect(() => {
@@ -124,23 +146,31 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setPlayerId(socket.id ?? null);
 
     const unsubscribers = [
-      on('game-created', ({ code }) => {
-        setGameCode(code);
+      // Game Browser
+      on('game-list', ({ games }) => {
+        setAvailableGames(games);
+      }),
+
+      // Lobby
+      on('game-created', ({ id, name }) => {
+        setGameId(id);
+        setGameName(name);
         setGamePhase('lobby');
       }),
 
       on('game-state', (state) => {
-        setGameCode(state.code);
+        setGameId(state.id);
+        setGameName(state.name);
         setGamePhase(state.phase);
         setPlayers(state.players);
         setSettings(state.settings);
-        // Initialize bonaken choices if in bonaken phase
-        if (state.phase === 'bonaken' && state.players.length > 0) {
-          setBonakenChoices(state.players.map(p => ({
-            playerId: p.id,
-            choice: null
-          })));
-        }
+        setTableCards(state.tableCards);
+        if (state.currentBid) setCurrentBid(state.currentBid);
+        if (state.bidWinner) setBidWinner(state.bidWinner);
+        if (state.biddingOrder.length > 0) setBiddingOrder(state.biddingOrder);
+        if (state.currentTurn) setCurrentTurn(state.currentTurn);
+        if (state.trump) setTrump(state.trump);
+        setTurnDeadline(state.turnDeadline);
       }),
 
       on('lobby-updated', ({ players: newPlayers, settings: newSettings }) => {
@@ -160,75 +190,99 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setGamePhase('dealing');
       }),
 
-      on('cards-dealt', ({ hand: dealtHand }) => {
+      // Dealing
+      on('cards-dealt', ({ hand: dealtHand, tableCards: dealtTableCards }) => {
         setHand(dealtHand);
-        console.log(`Received ${dealtHand.length} cards`);
+        setTableCards(dealtTableCards);
       }),
 
-      on('bonaken-phase-start', () => {
-        setGamePhase('bonaken');
-        setChosenCount(0);
-        setBonaker(null);
-        // Initialize bonaken choices for all players
-        setBonakenChoices(players.map(p => ({
-          playerId: p.id,
-          choice: null
-        })));
+      // Bidding
+      on('bidding-start', ({ biddingOrder: order, firstBidder }) => {
+        setGamePhase('bidding');
+        setBiddingOrder(order);
+        setCurrentTurn(firstBidder);
+        setCurrentBid(null);
+        setBidWinner(null);
       }),
 
-      on('player-chose', ({ playerId: chosenPlayerId }) => {
-        setChosenCount(prev => prev + 1);
-        // Update local choices to mark this player as having chosen
-        setBonakenChoices(prev =>
-          prev.map(c =>
-            c.playerId === chosenPlayerId
-              ? { ...c, choice: c.choice ?? 'passen' } // Mark as chosen but don't reveal
-              : c
-          )
-        );
+      on('bid-placed', ({ playerId: bidderId, bid }) => {
+        setCurrentBid(bid);
+        setPlayers(prev => prev.map(p =>
+          p.id === bidderId ? { ...p, hasPassed: false } : p
+        ));
       }),
 
-      on('bonaken-revealed', ({ choices, bonaker: winner }) => {
-        setBonakenChoices(choices);
-        setBonaker(winner);
-        console.log('Bonaken revealed:', choices, 'Winner:', winner);
+      on('bid-passed', ({ playerId: passedId }) => {
+        setPlayers(prev => prev.map(p =>
+          p.id === passedId ? { ...p, hasPassed: true } : p
+        ));
       }),
 
+      on('bidding-complete', ({ winner, bid }) => {
+        setBidWinner(winner);
+        setCurrentBid(bid);
+      }),
+
+      on('all-passed', () => {
+        // Iedereen gepast, wordt opnieuw gedeeld
+        setCurrentBid(null);
+        setBidWinner(null);
+        setGamePhase('dealing');
+      }),
+
+      // Card Swap
+      on('card-swap-start', ({ playerId: swapperId, tableCards: cards }) => {
+        setGamePhase('card-swap');
+        setCurrentTurn(swapperId);
+        setTableCards(cards);
+      }),
+
+      on('cards-swapped', ({ discardCount }) => {
+        console.log(`${discardCount} kaarten afgelegd`);
+      }),
+
+      // Trump
       on('trump-selection-start', ({ selectorId }) => {
         setGamePhase('trump-selection');
-        setTrumpSelector(selectorId);
-        console.log('Trump selection started, selector:', selectorId);
+        setCurrentTurn(selectorId);
       }),
 
       on('trump-selected', ({ trump: selectedTrump }) => {
         setTrump(selectedTrump);
       }),
 
-      on('turn-start', ({ playerId: turnPlayerId, validCardIds: validIds }) => {
+      // Roem
+      on('roem-declared', ({ declarations }) => {
+        setRoemDeclarations(declarations);
+      }),
+
+      on('false-roem', ({ playerId: falserId }) => {
+        console.log(`Vals roemen door ${falserId}!`);
+      }),
+
+      // Gameplay
+      on('turn-start', ({ playerId: turnPlayerId, validCardIds: validIds, deadline }) => {
         setGamePhase('playing');
         setCurrentTurn(turnPlayerId);
         setValidCardIds(validIds);
-        setTrickWinner(null); // Clear previous trick winner
-        console.log(`Turn started for ${turnPlayerId}, valid cards:`, validIds);
+        setTrickWinner(null);
+        setTurnDeadline(deadline);
       }),
 
       on('card-played', ({ playerId: cardPlayerId, card }) => {
         setCurrentTrick(prev => [...prev, { playerId: cardPlayerId, card }]);
-        // Remove card from hand if it's our card
         if (cardPlayerId === socket?.id) {
           setHand(prev => prev.filter(c => c.id !== card.id));
         }
       }),
 
-      on('trick-complete', ({ winnerId, tricksWon }) => {
+      on('trick-complete', ({ winnerId, trickPoints: points, tricksWon }) => {
         setTrickWinner(winnerId);
         setCurrentTurn(null);
-        // Update players' tricksWon
         setPlayers(prev => prev.map(p => ({
           ...p,
           tricksWon: tricksWon[p.id] ?? p.tricksWon
         })));
-        console.log(`Trick complete! Winner: ${winnerId}`, tricksWon);
       }),
 
       on('trick-cleared', () => {
@@ -236,42 +290,44 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setTrickWinner(null);
       }),
 
-      on('round-scores', ({ scores, bonakenSucceeded: succeeded }) => {
-        setRoundScores(scores);
-        setBonakenSucceeded(succeeded);
+      // Scoring
+      on('round-result', (result) => {
+        setRoundResult(result);
         setGamePhase('round-end');
       }),
 
-      on('game-scores', ({ scores }) => {
-        setGameScores(scores);
-      }),
-
-      on('game-ended', ({ loserId: loser, finalScores }) => {
+      on('game-ended', ({ playerStatuses: statuses }) => {
         setGamePhase('game-end');
-        setGameScores(finalScores);
-        setLoserId(loser);
-        setRematchRequests([]); // Reset rematch requests
-        console.log(`Game ended! Loser: ${loser}`);
+        setPlayerStatuses(statuses);
+        setRematchRequests([]);
       }),
 
-      on('rematch-requested', ({ playerId: requesterId, nickname: requesterName }) => {
+      // Timer
+      on('timer-update', ({ deadline }) => {
+        setTurnDeadline(deadline);
+      }),
+
+      on('timer-expired', ({ playerId: expiredId, autoAction }) => {
+        console.log(`Timer verlopen voor ${expiredId}: ${autoAction}`);
+      }),
+
+      // Connection
+      on('rematch-requested', ({ playerId: requesterId }) => {
         setRematchRequests(prev =>
           prev.includes(requesterId) ? prev : [...prev, requesterId]
         );
-        console.log(`${requesterName} wil een rematch`);
       }),
 
       on('rematch-started', () => {
         setRematchRequests([]);
-        setGameScores({});
-        setRoundScores(null);
-        setBonakenSucceeded(null);
-        setBonaker(null);
+        setRoundResult(null);
+        setCurrentBid(null);
+        setBidWinner(null);
         setTrump(null);
         setCurrentTrick([]);
         setTrickWinner(null);
-        setLoserId(null);
-        console.log('Rematch gestart!');
+        setRoemDeclarations([]);
+        setPlayerStatuses({});
       }),
 
       on('error', ({ message }) => {
@@ -300,13 +356,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
     emit('create-game', { nickname: nickname.trim(), settings: gameSettings });
   }, [emit, nickname]);
 
-  const joinGame = useCallback((code: string) => {
+  const joinGame = useCallback((id: string) => {
     if (!nickname.trim()) {
       setError('Voer eerst een bijnaam in');
       return;
     }
-    emit('join-game', { code: code.toUpperCase(), nickname: nickname.trim() });
+    emit('join-game', { gameId: id, nickname: nickname.trim() });
   }, [emit, nickname]);
+
+  const listGames = useCallback(() => {
+    emit('list-games');
+  }, [emit]);
 
   const updateSettings = useCallback((newSettings: GameSettings) => {
     emit('update-settings', { settings: newSettings });
@@ -317,20 +377,32 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [emit]);
 
   const leaveGame = useCallback(() => {
-    setGameCode(null);
+    setGameId(null);
+    setGameName(null);
     setGamePhase(null);
     setPlayers([]);
     setSettings(defaultSettings);
-    // Socket disconnect will handle server-side cleanup
     window.location.reload();
   }, []);
 
-  const makeBonakChoice = useCallback((choice: 'bonaken' | 'passen') => {
-    emit('bonaken-choice', { choice });
+  const placeBid = useCallback((type: BidType, amount: number) => {
+    emit('place-bid', { type, amount });
+  }, [emit]);
+
+  const passBid = useCallback(() => {
+    emit('pass-bid');
+  }, [emit]);
+
+  const swapCards = useCallback((discardCardIds: string[]) => {
+    emit('swap-cards', { discardCardIds });
   }, [emit]);
 
   const selectTrump = useCallback((suit: Suit) => {
     emit('select-trump', { suit });
+  }, [emit]);
+
+  const declareRoem = useCallback((declarations: RoemDeclaration[]) => {
+    emit('declare-roem', { declarations });
   }, [emit]);
 
   const playCard = useCallback((cardId: string) => {
@@ -352,25 +424,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setNickname,
       playerId,
       isHost,
-      gameCode,
+      availableGames,
+      listGames,
+      gameId,
+      gameName,
       gamePhase,
       players,
       settings,
       hand,
       trump,
-      bonakenChoices,
-      bonaker,
-      chosenCount,
-      hasChosen,
-      trumpSelector,
+      tableCards,
+      currentBid,
+      bidWinner,
+      biddingOrder,
       currentTurn,
       currentTrick,
       validCardIds,
       trickWinner,
-      roundScores,
-      gameScores,
-      bonakenSucceeded,
-      loserId,
+      turnDeadline,
+      roemDeclarations,
+      roundResult,
+      playerStatuses,
       rematchRequests,
       error,
       clearError,
@@ -379,8 +453,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       updateSettings,
       startGame,
       leaveGame,
-      makeBonakChoice,
+      placeBid,
+      passBid,
+      swapCards,
       selectTrump,
+      declareRoem,
       playCard,
       requestRematch
     }}>

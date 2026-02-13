@@ -1,6 +1,8 @@
 import { useGame } from '../contexts/GameContext';
 import type { Suit } from '@shared/index';
 import { Table } from './Table';
+import { TurnTimer } from './TurnTimer';
+import { RoemIndicator } from './RoemIndicator';
 import styles from './PlayingPhase.module.css';
 
 const SUIT_SYMBOLS: Record<Suit, string> = {
@@ -17,6 +19,15 @@ const SUIT_NAMES: Record<Suit, string> = {
   schoppen: 'Schoppen'
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  suf: 'Suf',
+  krom: 'Krom',
+  recht: 'Recht',
+  wip: 'Wip',
+  erin: 'Erin',
+  eruit: 'Eruit'
+};
+
 /**
  * PlayingPhase - The main gameplay component
  * Shows current trick, trump indicator, turn indicator, and scores
@@ -29,7 +40,8 @@ export function PlayingPhase() {
     players,
     playerId,
     trickWinner,
-    bonaker
+    bidWinner,
+    turnDeadline
   } = useGame();
 
   const isMyTurn = currentTurn === playerId;
@@ -70,6 +82,7 @@ export function PlayingPhase() {
 
         {/* Turn Indicator */}
         <div className={`${styles.turnIndicator} ${isMyTurn ? styles.myTurn : ''}`}>
+          {turnDeadline && <TurnTimer deadline={turnDeadline} />}
           {trickWinner ? (
             <div className={styles.winnerAnnouncement}>
               <span className={styles.winnerIcon}>★</span>
@@ -138,13 +151,16 @@ export function PlayingPhase() {
         </Table>
       </div>
 
+      {/* Roem display */}
+      <RoemIndicator />
+
       {/* Bottom: Player scores */}
       <div className={styles.scoreBoard}>
-        <div className={styles.scoreTitle}>Slagen</div>
+        <div className={styles.scoreTitle}>Punten</div>
         <div className={styles.scores}>
           {players.map(player => {
             const isCurrentTurn = player.id === currentTurn;
-            const isBonaker = player.id === bonaker;
+            const isBidWinner = player.id === bidWinner;
             const isMe = player.id === playerId;
 
             return (
@@ -153,15 +169,16 @@ export function PlayingPhase() {
                 className={`
                   ${styles.scoreItem}
                   ${isCurrentTurn ? styles.active : ''}
-                  ${isBonaker ? styles.bonaker : ''}
+                  ${isBidWinner ? styles.bonaker : ''}
                   ${isMe ? styles.me : ''}
                 `}
               >
                 <span className={styles.scoreName}>
                   {player.nickname}
-                  {isBonaker && <span className={styles.bonakerBadge}>B</span>}
+                  {isBidWinner && <span className={styles.bonakerBadge}>B</span>}
+                  <span className={styles.statusLabel}>{STATUS_LABELS[player.status] || ''}</span>
                 </span>
-                <span className={styles.scoreValue}>{player.tricksWon}</span>
+                <span className={styles.scoreValue}>{player.trickPoints}pt / {player.tricksWon}sl</span>
               </div>
             );
           })}

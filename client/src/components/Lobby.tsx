@@ -5,7 +5,7 @@ import styles from './Lobby.module.css';
 
 export function Lobby() {
   const {
-    gameCode,
+    gameName,
     players,
     settings,
     isHost,
@@ -16,33 +16,13 @@ export function Lobby() {
   } = useGame();
 
   const [localSettings, setLocalSettings] = useState<GameSettings>(settings);
-  const [copied, setCopied] = useState(false);
 
-  const canStart = players.length >= settings.minPlayers;
-
-  const handleCopyCode = async () => {
-    if (gameCode) {
-      await navigator.clipboard.writeText(gameCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleMinChange = (value: number) => {
-    const newSettings = {
-      ...localSettings,
-      minPlayers: value,
-      maxPlayers: Math.max(localSettings.maxPlayers, value)
-    };
-    setLocalSettings(newSettings);
-    updateSettings(newSettings);
-  };
+  const canStart = players.length >= 2;
 
   const handleMaxChange = (value: number) => {
     const newSettings = {
       ...localSettings,
-      maxPlayers: value,
-      minPlayers: Math.min(localSettings.minPlayers, value)
+      maxPlayers: value
     };
     setLocalSettings(newSettings);
     updateSettings(newSettings);
@@ -51,23 +31,12 @@ export function Lobby() {
   return (
     <div className={styles.container}>
       <div className={styles.lobby}>
-        {/* Header with game code */}
+        {/* Header with game name */}
         <header className={styles.header}>
           <h1 className={styles.title}>Wachtkamer</h1>
-
           <div className={styles.codeSection}>
-            <span className={styles.codeLabel}>Spelcode</span>
-            <button
-              className={styles.codeButton}
-              onClick={handleCopyCode}
-              title="Kopieer spelcode"
-            >
-              <span className={styles.code}>{gameCode}</span>
-              <span className={styles.copyIcon}>
-                {copied ? '✓' : '⧉'}
-              </span>
-            </button>
-            {copied && <span className={styles.copiedText}>Gekopieerd!</span>}
+            <span className={styles.codeLabel}>Spel</span>
+            <span className={styles.code}>{gameName}</span>
           </div>
         </header>
 
@@ -116,26 +85,12 @@ export function Lobby() {
             <div className={styles.settingsGrid}>
               <div className={styles.setting}>
                 <label className={styles.settingLabel}>
-                  Min: <strong>{localSettings.minPlayers}</strong>
+                  Max spelers: <strong>{localSettings.maxPlayers}</strong>
                 </label>
                 <input
                   type="range"
                   min={2}
-                  max={7}
-                  value={localSettings.minPlayers}
-                  onChange={e => handleMinChange(Number(e.target.value))}
-                  className={styles.slider}
-                />
-              </div>
-
-              <div className={styles.setting}>
-                <label className={styles.settingLabel}>
-                  Max: <strong>{localSettings.maxPlayers}</strong>
-                </label>
-                <input
-                  type="range"
-                  min={2}
-                  max={7}
+                  max={5}
                   value={localSettings.maxPlayers}
                   onChange={e => handleMaxChange(Number(e.target.value))}
                   className={styles.slider}
@@ -148,18 +103,16 @@ export function Lobby() {
         {/* Actions */}
         <footer className={styles.footer}>
           {isHost ? (
-            <>
-              <button
-                className={styles.startButton}
-                onClick={startGame}
-                disabled={!canStart}
-              >
-                {canStart
-                  ? 'Start Spel'
-                  : `Nog ${settings.minPlayers - players.length} speler(s) nodig`
-                }
-              </button>
-            </>
+            <button
+              className={styles.startButton}
+              onClick={startGame}
+              disabled={!canStart}
+            >
+              {canStart
+                ? 'Start Spel'
+                : `Nog ${2 - players.length} speler(s) nodig`
+              }
+            </button>
           ) : (
             <div className={styles.waitingMessage}>
               <span className={styles.waitingIcon}>⏳</span>

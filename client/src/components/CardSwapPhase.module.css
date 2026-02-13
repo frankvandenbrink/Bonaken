@@ -1,0 +1,421 @@
+/* CardSwapPhase.module.css - Victorian card exchange ritual */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  min-height: 400px;
+  animation: fadeIn 0.5s ease;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  max-width: 600px;
+}
+
+.headerLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.5) 50%,
+    transparent 100%
+  );
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+  white-space: nowrap;
+  margin: 0;
+}
+
+.instruction {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--cream);
+  opacity: 0.8;
+  text-align: center;
+}
+
+.instruction strong {
+  color: var(--gold);
+}
+
+/* ============================================
+   TABLE CARDS
+   ============================================ */
+
+.tableCardsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.sectionLabel {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.selectionCount {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--cream);
+  opacity: 0.7;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.tableCardsRow {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+}
+
+.tableCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  opacity: 0;
+  animation: cardReveal 0.5s ease forwards;
+}
+
+@keyframes cardReveal {
+  from {
+    opacity: 0;
+    transform: rotateY(90deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(0);
+  }
+}
+
+.cardLabel {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: rgba(245, 245, 220, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================
+   CARD FACES (shared between table and hand)
+   ============================================ */
+
+.cardFace {
+  width: 65px;
+  height: 92px;
+  background: linear-gradient(
+    135deg,
+    #fff 0%,
+    #f8f8f8 50%,
+    #f0f0f0 100%
+  );
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.cardFace.red {
+  color: #c41e3a;
+}
+
+.cardFace.black {
+  color: #1a1a1a;
+}
+
+.cardRank {
+  font-family: 'Georgia', serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.cardSuit {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.cardBack {
+  width: 65px;
+  height: 92px;
+  background: linear-gradient(
+    135deg,
+    var(--wood-medium) 0%,
+    var(--wood-dark) 100%
+  );
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    0 0 10px rgba(212, 175, 55, 0.15);
+}
+
+.backPattern {
+  font-size: 0.7rem;
+  color: var(--gold);
+  opacity: 0.5;
+  letter-spacing: 0.1em;
+}
+
+.tableCard.faceUp .cardFace {
+  border: 2px solid rgba(212, 175, 55, 0.4);
+}
+
+/* ============================================
+   HAND SECTION
+   ============================================ */
+
+.handSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.handGrid {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.handCard {
+  position: relative;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+}
+
+.handCard:hover {
+  transform: translateY(-6px);
+}
+
+.handCard:hover .cardFace {
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.handCard.selectedCard {
+  transform: translateY(-8px);
+}
+
+.handCard.selectedCard .cardFace {
+  border: 2px solid #c41e3a;
+  opacity: 0.7;
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(196, 30, 58, 0.3);
+}
+
+.discardOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(196, 30, 58, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.discardIcon {
+  font-size: 1.8rem;
+  color: #e57373;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(196, 30, 58, 0.5);
+}
+
+/* ============================================
+   CONFIRM BUTTON
+   ============================================ */
+
+.confirmButton {
+  padding: var(--space-md) var(--space-2xl);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  color: rgba(245, 245, 220, 0.5);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+}
+
+.confirmButton.ready {
+  background: linear-gradient(
+    135deg,
+    var(--gold) 0%,
+    var(--gold-dark) 100%
+  );
+  color: var(--wood-dark);
+  border-color: transparent;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+}
+
+.confirmButton.ready:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 25px rgba(212, 175, 55, 0.4),
+    0 0 30px rgba(212, 175, 55, 0.2);
+}
+
+/* ============================================
+   WAITING STATE
+   ============================================ */
+
+.waitingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  text-align: center;
+  padding: var(--space-2xl);
+}
+
+.waitingIcon {
+  position: relative;
+}
+
+.cardStack {
+  font-size: 5rem;
+  opacity: 0.6;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+.waitingTitle {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.waitingSubtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--cream);
+  opacity: 0.8;
+}
+
+.swapperName {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.waitingDots {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.4;
+  animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .cardFace,
+  .cardBack {
+    width: 52px;
+    height: 74px;
+  }
+
+  .cardRank {
+    font-size: 1.1rem;
+  }
+
+  .cardSuit {
+    font-size: 1.3rem;
+  }
+
+  .handGrid {
+    gap: var(--space-xs);
+  }
+}

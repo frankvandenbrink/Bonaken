@@ -176,6 +176,70 @@
   opacity: 0.5;
 }
 
+/* Text input */
+.textInput {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: 1rem;
+  border: 2px solid var(--wood-light);
+  border-radius: var(--border-radius);
+  background: linear-gradient(180deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+  color: var(--cream);
+}
+
+.textInput:focus {
+  border-color: var(--gold);
+  box-shadow: var(--shadow-gold);
+  outline: none;
+}
+
+.textInput::placeholder {
+  color: rgba(245, 245, 220, 0.3);
+}
+
+/* Timer options */
+.timerOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.timerOption {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.8rem;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--cream);
+  border: 1px solid var(--wood-light);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.timerOption:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.timerActive {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.customTimer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.timerUnit {
+  font-size: 0.85rem;
+  color: var(--cream);
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
 /* Info box */
 .infoBox {
   padding: var(--space-md);

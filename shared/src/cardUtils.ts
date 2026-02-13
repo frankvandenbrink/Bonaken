@@ -109,3 +109,30 @@ export function getRankName(rank: Rank): string {
 export function getRankDisplay(rank: Rank): string {
   return rank;
 }
+
+// Kaartpunten (Leimuiden variant)
+const TRUMP_POINTS: Record<Rank, number> = {
+  'B': 20, '9': 14, 'A': 11, '10': 10, 'K': 3, 'V': 2, '8': 0, '7': 0
+};
+
+const NON_TRUMP_POINTS: Record<Rank, number> = {
+  'A': 11, '10': 10, 'K': 3, 'V': 2, 'B': 1, '9': 0, '8': 0, '7': 0
+};
+
+/**
+ * Krijg de puntwaarde van een kaart
+ * Troefkaarten hebben andere waarden dan niet-troefkaarten
+ */
+export function getCardPoints(card: Card, trump: Suit | null): number {
+  if (trump && card.suit === trump) {
+    return TRUMP_POINTS[card.rank];
+  }
+  return NON_TRUMP_POINTS[card.rank];
+}
+
+/**
+ * Bereken het totaal puntwaarde van kaarten in een slag
+ */
+export function getTrickPoints(trick: { card: Card }[], trump: Suit | null): number {
+  return trick.reduce((total, played) => total + getCardPoints(played.card, trump), 0);
+}

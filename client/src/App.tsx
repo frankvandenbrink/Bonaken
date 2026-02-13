@@ -30,9 +30,9 @@ function GameRouter() {
   }
 
   // Show game screen when game starts
-  if (gamePhase === 'dealing' || gamePhase === 'bonaken' ||
-      gamePhase === 'trump-selection' || gamePhase === 'playing' ||
-      gamePhase === 'round-end' || gamePhase === 'game-end') {
+  if (gamePhase === 'dealing' || gamePhase === 'bidding' ||
+      gamePhase === 'card-swap' || gamePhase === 'trump-selection' ||
+      gamePhase === 'playing' || gamePhase === 'round-end' || gamePhase === 'game-end') {
     return <GameScreen />;
   }
 

@@ -1,10 +1,13 @@
 import { useGame } from '../contexts/GameContext';
 import { Hand } from './Hand';
-import { BonakenPhase } from './BonakenPhase';
+import { BiddingPhase } from './BiddingPhase';
+import { CardSwapPhase } from './CardSwapPhase';
 import { TrumpSelection } from './TrumpSelection';
 import { PlayingPhase } from './PlayingPhase';
 import { RoundEnd } from './RoundEnd';
 import { GameEnd } from './GameEnd';
+import { StatusBadge } from './StatusBadge';
+import { TurnTimer } from './TurnTimer';
 import styles from './GameScreen.module.css';
 
 /**
@@ -12,15 +15,15 @@ import styles from './GameScreen.module.css';
  */
 export function GameScreen() {
   const {
-    gameCode,
+    gameName,
     gamePhase,
     players,
     hand,
     trump,
     playerId,
-    nickname,
     currentTurn,
     validCardIds,
+    turnDeadline,
     playCard
   } = useGame();
 
@@ -32,11 +35,11 @@ export function GameScreen() {
       {/* Header with game info */}
       <header className={styles.header}>
         <div className={styles.gameInfo}>
-          <span className={styles.gameCode}>Spel: {gameCode}</span>
+          <span className={styles.gameCode}>Spel: {gameName}</span>
           <span className={styles.phase}>Fase: {gamePhase}</span>
         </div>
         <div className={styles.playerInfo}>
-          <span className={styles.nickname}>{nickname}</span>
+          <span className={styles.nickname}>{currentPlayer?.nickname}</span>
           {currentPlayer?.isHost && <span className={styles.hostBadge}>Host</span>}
         </div>
       </header>
@@ -45,13 +48,19 @@ export function GameScreen() {
       <main className={styles.gameArea}>
         {/* Player list */}
         <aside className={styles.playerList}>
-          <h3>Spelers</h3>
+          <div className={styles.playerListHeader}>
+            <h3>Spelers</h3>
+            {turnDeadline && <TurnTimer deadline={turnDeadline} />}
+          </div>
           <ul>
             {players.map(player => (
-              <li key={player.id} className={player.id === playerId ? styles.currentPlayer : ''}>
-                {player.nickname}
-                {player.isHost && ' 👑'}
-                {!player.isConnected && ' (offline)'}
+              <li key={player.id} className={`${player.id === playerId ? styles.currentPlayer : ''} ${player.id === currentTurn ? styles.activeTurn : ''}`}>
+                <span className={styles.playerNameRow}>
+                  {player.nickname}
+                  {player.isHost && ' '}
+                  {!player.isConnected && <span className={styles.offlineTag}>(offline)</span>}
+                </span>
+                <StatusBadge status={player.status} compact />
               </li>
             ))}
           </ul>
@@ -59,7 +68,9 @@ export function GameScreen() {
 
         {/* Center area - phase specific content */}
         <div className={styles.centerArea}>
-          {gamePhase === 'bonaken' && <BonakenPhase />}
+          {gamePhase === 'bidding' && <BiddingPhase />}
+
+          {gamePhase === 'card-swap' && <CardSwapPhase />}
 
           {gamePhase === 'trump-selection' && <TrumpSelection />}
 

@@ -14,10 +14,10 @@ const SUITS: { suit: Suit; symbol: string; name: string; color: 'red' | 'black' 
  * The bonaker (or dealer if no one bonaked) chooses the trump suit
  */
 export function TrumpSelection() {
-  const { trumpSelector, playerId, trump, selectTrump, players } = useGame();
+  const { currentTurn, playerId, trump, selectTrump, players } = useGame();
 
-  const isSelector = trumpSelector === playerId;
-  const selectorPlayer = players.find(p => p.id === trumpSelector);
+  const isSelector = currentTurn === playerId;
+  const selectorPlayer = players.find(p => p.id === currentTurn);
   const selectorName = selectorPlayer?.nickname || 'Onbekend';
 
   // If trump is already selected, show confirmation

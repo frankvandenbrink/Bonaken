@@ -8,7 +8,7 @@ import type {
   ClientToServerEvents
 } from 'shared';
 import { setupLobbyHandlers } from './socket/lobbyHandlers';
-import { setupBonakenHandlers } from './socket/bonakenHandlers';
+import { setupBiddingHandlers } from './socket/biddingHandlers';
 import { setupTrumpHandlers } from './socket/trumpHandlers';
 import { setupGameplayHandlers } from './socket/gameplayHandlers';
 import { gameManager } from './game/GameManager';
@@ -56,7 +56,7 @@ io.on('connection', (socket) => {
 
   // Setup handlers voor deze socket
   setupLobbyHandlers(io, socket);
-  setupBonakenHandlers(io, socket);
+  setupBiddingHandlers(io, socket);
   setupTrumpHandlers(io, socket);
   setupGameplayHandlers(io, socket);
 });

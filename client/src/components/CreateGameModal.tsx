@@ -7,31 +7,32 @@ interface CreateGameModalProps {
   onClose: () => void;
 }
 
+const TIMER_PRESETS = [
+  { label: 'Geen timer', value: null },
+  { label: '1 minuut', value: 60 },
+  { label: '5 minuten', value: 300 },
+  { label: '30 minuten', value: 1800 },
+  { label: '1 uur', value: 3600 },
+  { label: '24 uur', value: 86400 },
+];
+
 export function CreateGameModal({ onClose }: CreateGameModalProps) {
   const { createGame, nickname } = useGame();
   const [settings, setSettings] = useState<GameSettings>({
-    minPlayers: 2,
-    maxPlayers: 4
+    maxPlayers: 4,
+    gameName: '',
+    turnTimerSeconds: null
   });
+  const [customTimer, setCustomTimer] = useState(false);
+  const [customSeconds, setCustomSeconds] = useState(300);
 
   const handleCreate = () => {
-    createGame(settings);
-  };
-
-  const handleMinChange = (value: number) => {
-    setSettings(prev => ({
-      ...prev,
-      minPlayers: value,
-      maxPlayers: Math.max(prev.maxPlayers, value)
-    }));
-  };
-
-  const handleMaxChange = (value: number) => {
-    setSettings(prev => ({
-      ...prev,
-      maxPlayers: value,
-      minPlayers: Math.min(prev.minPlayers, value)
-    }));
+    if (!settings.gameName.trim()) return;
+    createGame({
+      ...settings,
+      gameName: settings.gameName.trim(),
+      turnTimerSeconds: customTimer ? customSeconds : settings.turnTimerSeconds
+    });
   };
 
   return (
@@ -51,24 +52,20 @@ export function CreateGameModal({ onClose }: CreateGameModalProps) {
         )}
 
         <div className={styles.content}>
-          {/* Min Players */}
+          {/* Game Name */}
           <div className={styles.setting}>
             <div className={styles.settingHeader}>
-              <label className={styles.settingLabel}>Minimum Spelers</label>
-              <span className={styles.settingValue}>{settings.minPlayers}</span>
+              <label className={styles.settingLabel}>Spelnaam</label>
             </div>
             <input
-              type="range"
-              min={2}
-              max={7}
-              value={settings.minPlayers}
-              onChange={e => handleMinChange(Number(e.target.value))}
-              className={styles.slider}
+              type="text"
+              value={settings.gameName}
+              onChange={e => setSettings(prev => ({ ...prev, gameName: e.target.value }))}
+              placeholder="Bijv. Tafel van Henk"
+              maxLength={30}
+              className={styles.textInput}
+              autoFocus
             />
-            <div className={styles.sliderLabels}>
-              <span>2</span>
-              <span>7</span>
-            </div>
           </div>
 
           {/* Max Players */}
@@ -80,28 +77,63 @@ export function CreateGameModal({ onClose }: CreateGameModalProps) {
             <input
               type="range"
               min={2}
-              max={7}
+              max={5}
               value={settings.maxPlayers}
-              onChange={e => handleMaxChange(Number(e.target.value))}
+              onChange={e => setSettings(prev => ({ ...prev, maxPlayers: Number(e.target.value) }))}
               className={styles.slider}
             />
             <div className={styles.sliderLabels}>
               <span>2</span>
-              <span>7</span>
+              <span>5</span>
             </div>
+          </div>
+
+          {/* Timer */}
+          <div className={styles.setting}>
+            <div className={styles.settingHeader}>
+              <label className={styles.settingLabel}>Timer per beurt</label>
+            </div>
+            <div className={styles.timerOptions}>
+              {TIMER_PRESETS.map(preset => (
+                <button
+                  key={preset.label}
+                  className={`${styles.timerOption} ${
+                    !customTimer && settings.turnTimerSeconds === preset.value ? styles.timerActive : ''
+                  }`}
+                  onClick={() => {
+                    setCustomTimer(false);
+                    setSettings(prev => ({ ...prev, turnTimerSeconds: preset.value }));
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+              <button
+                className={`${styles.timerOption} ${customTimer ? styles.timerActive : ''}`}
+                onClick={() => setCustomTimer(true)}
+              >
+                Aangepast...
+              </button>
+            </div>
+            {customTimer && (
+              <div className={styles.customTimer}>
+                <input
+                  type="number"
+                  min={10}
+                  max={86400}
+                  value={customSeconds}
+                  onChange={e => setCustomSeconds(Number(e.target.value))}
+                  className={styles.textInput}
+                />
+                <span className={styles.timerUnit}>seconden</span>
+              </div>
+            )}
           </div>
 
           {/* Info box */}
           <div className={styles.infoBox}>
-            <p>
-              <strong>Kaarten per speler:</strong>{' '}
-              {settings.maxPlayers === 2 && '16'}
-              {settings.maxPlayers === 3 && '10'}
-              {settings.maxPlayers === 4 && '8'}
-              {settings.maxPlayers === 5 && '6'}
-              {settings.maxPlayers === 6 && '5'}
-              {settings.maxPlayers === 7 && '4'}
-            </p>
+            <p><strong>Kaarten per speler:</strong> 6 (altijd)</p>
+            <p><strong>Tafelkaarten:</strong> 2 open{settings.maxPlayers <= 4 ? ' + 1 blind' : ''}</p>
           </div>
         </div>
 
@@ -112,7 +144,7 @@ export function CreateGameModal({ onClose }: CreateGameModalProps) {
           <button
             className={styles.confirmButton}
             onClick={handleCreate}
-            disabled={!nickname}
+            disabled={!nickname || !settings.gameName.trim()}
           >
             Spel Aanmaken
           </button>

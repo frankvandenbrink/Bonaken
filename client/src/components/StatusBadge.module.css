@@ -1,0 +1,61 @@
+/* StatusBadge.module.css - Player status indicator */
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.compact {
+  font-size: 0.55rem;
+  padding: 0.1rem 0.3rem;
+}
+
+/* Suf - Starting state, neutral grey */
+.suf {
+  background: rgba(150, 150, 150, 0.25);
+  color: rgba(200, 200, 200, 0.8);
+  border: 1px solid rgba(150, 150, 150, 0.3);
+}
+
+/* Krom - One loss, danger */
+.krom {
+  background: rgba(230, 126, 34, 0.2);
+  color: #e67e22;
+  border: 1px solid rgba(230, 126, 34, 0.4);
+}
+
+/* Recht - One win, safe path */
+.recht {
+  background: rgba(39, 174, 96, 0.2);
+  color: #27ae60;
+  border: 1px solid rgba(39, 174, 96, 0.4);
+}
+
+/* Wip - Could go either way */
+.wip {
+  background: rgba(241, 196, 15, 0.2);
+  color: #f1c40f;
+  border: 1px solid rgba(241, 196, 15, 0.4);
+}
+
+/* Erin - Lost! Must buy a round */
+.erin {
+  background: rgba(192, 57, 43, 0.25);
+  color: #e74c3c;
+  border: 1px solid rgba(192, 57, 43, 0.5);
+}
+
+/* Eruit - Safe! Survived */
+.eruit {
+  background: rgba(41, 128, 185, 0.25);
+  color: #3498db;
+  border: 1px solid rgba(41, 128, 185, 0.5);
+}

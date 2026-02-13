@@ -2,25 +2,103 @@ import { Server, Socket } from 'socket.io';
 import type { ServerToClientEvents, ClientToServerEvents, Suit } from 'shared';
 import { gameManager } from '../game/GameManager';
 import { startPlayerTurn } from './gameplayHandlers';
+import { cancelTimer } from '../game/timer';
+import { startTrumpTimer } from './biddingHandlers';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
-/**
- * Bepaal wie troef mag kiezen: bonaker of deler (als niemand bonaakt)
- */
-export function getTrumpSelector(bonaker: string | null, dealerId: string): string {
-  return bonaker || dealerId;
-}
-
-/**
- * Valideer of een suit geldig is
- */
 function isValidSuit(suit: string): suit is Suit {
   return ['harten', 'ruiten', 'klaveren', 'schoppen'].includes(suit);
 }
 
 export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
+  // Card swap: bieder legt kaarten af na tafelkaarten oppakken
+  socket.on('swap-cards', ({ discardCardIds }) => {
+    const game = gameManager.getGameByPlayerId(socket.id);
+
+    if (!game) {
+      socket.emit('error', { message: 'Je bent niet in een spel' });
+      return;
+    }
+
+    if (game.phase !== 'card-swap') {
+      socket.emit('error', { message: 'Het is geen kaart-ruil fase' });
+      return;
+    }
+
+    if (socket.id !== game.bidWinner) {
+      socket.emit('error', { message: 'Alleen de bieder mag kaarten ruilen' });
+      return;
+    }
+
+    cancelTimer(game.id);
+    game.turnDeadline = null;
+
+    const player = game.players.find(p => p.id === socket.id);
+    if (!player) return;
+
+    // Aantal af te leggen kaarten = aantal tafelkaarten
+    const tableCardCount = game.tableCards.length;
+    if (discardCardIds.length !== tableCardCount) {
+      socket.emit('error', { message: `Je moet precies ${tableCardCount} kaarten afleggen` });
+      return;
+    }
+
+    // Voeg tafelkaarten toe aan hand
+    for (const tc of game.tableCards) {
+      player.hand.push(tc.card);
+    }
+
+    // Verwijder afgelegde kaarten uit hand
+    const discardedCards = [];
+    for (const cardId of discardCardIds) {
+      const cardIndex = player.hand.findIndex(c => c.id === cardId);
+      if (cardIndex === -1) {
+        socket.emit('error', { message: 'Kaart niet gevonden in je hand' });
+        return;
+      }
+      discardedCards.push(player.hand[cardIndex]);
+      player.hand.splice(cardIndex, 1);
+    }
+
+    // Afgelegde kaarten punten zijn voor de tegenpartij (opgeslagen voor scoring)
+    game.tableCards = []; // Tafel leeg
+
+    io.to(game.id).emit('cards-swapped', { discardCount: discardedCards.length });
+
+    // Stuur bijgewerkte hand naar bieder
+    io.to(socket.id).emit('cards-dealt', {
+      hand: player.hand,
+      tableCards: []
+    });
+
+    // Bepaal of troefkeuze nodig is
+    if (game.currentBid?.type === 'zwabber') {
+      // Zwabber = geen troef
+      game.trump = null;
+      game.phase = 'playing';
+
+      io.to(game.id).emit('trump-selected', { trump: null as unknown as Suit });
+
+      // Start speelfase
+      setTimeout(() => {
+        const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
+        const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
+        const firstPlayer = game.players[firstPlayerIndex];
+        startPlayerTurn(io, game, firstPlayer.id);
+      }, 1000);
+    } else {
+      // Troefkeuze fase
+      game.phase = 'trump-selection';
+      game.currentTurn = socket.id;
+      io.to(game.id).emit('trump-selection-start', { selectorId: socket.id });
+      startTrumpTimer(io, game);
+    }
+
+    game.lastActivity = Date.now();
+  });
+
   // Speler selecteert troef
   socket.on('select-trump', ({ suit }) => {
     const game = gameManager.getGameByPlayerId(socket.id);
@@ -35,59 +113,37 @@ export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
       return;
     }
 
-    // Bepaal wie mag selecteren
-    const selectorId = getTrumpSelector(game.bonaker, game.currentDealer);
-
-    if (socket.id !== selectorId) {
+    if (socket.id !== game.bidWinner) {
       socket.emit('error', { message: 'Je mag geen troef kiezen' });
       return;
     }
 
-    // Valideer de suit
     if (!isValidSuit(suit)) {
       socket.emit('error', { message: 'Ongeldige troefkleur' });
       return;
     }
 
-    // Set troef
+    cancelTimer(game.id);
+    game.turnDeadline = null;
+
     game.trump = suit;
 
     console.log(`Troef gekozen: ${suit} door ${game.players.find(p => p.id === socket.id)?.nickname}`);
 
-    // Broadcast naar alle spelers
-    io.to(game.code).emit('trump-selected', { trump: suit });
+    io.to(game.id).emit('trump-selected', { trump: suit });
 
-    // Geef slapende kaarten aan de bonaker (als er een bonaker is)
-    if (game.bonaker && game.sleepingCards.length > 0) {
-      const bonaker = game.players.find(p => p.id === game.bonaker);
-      if (bonaker) {
-        bonaker.hand.push(...game.sleepingCards);
-        console.log(`${bonaker.nickname} ontvangt ${game.sleepingCards.length} slapende kaarten`);
-
-        // Stuur bijgewerkte hand naar bonaker
-        const bonakerSocket = io.sockets.sockets.get(game.bonaker);
-        if (bonakerSocket) {
-          bonakerSocket.emit('cards-dealt', { hand: bonaker.hand });
-        }
-      }
-      game.sleepingCards = [];
-    }
-
-    // Wacht even en ga dan naar speelfase
+    // Start speelfase na korte pauze
     setTimeout(() => {
       game.phase = 'playing';
       game.lastActivity = Date.now();
 
-      // Bepaal eerste speler (links van deler = volgende in de rij)
       const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
       const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
       const firstPlayer = game.players[firstPlayerIndex];
 
       console.log(`Spel start! Eerste speler: ${firstPlayer.nickname}`);
-
-      // Start eerste beurt
       startPlayerTurn(io, game, firstPlayer.id);
-    }, 1500); // 1.5 seconden om troef te zien
+    }, 1500);
 
     game.lastActivity = Date.now();
   });
