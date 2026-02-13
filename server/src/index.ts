@@ -30,13 +30,14 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
           'capacitor://localhost',
           'http://localhost',
         ]
-      : [
-          'http://localhost:5173',
-          'http://localhost:5174',
-          'https://localhost',
-          'capacitor://localhost',
-          'http://localhost',
-        ],
+      : (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+          // In development: sta alle localhost origins toe
+          if (!origin || origin.startsWith('http://localhost')) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        },
     methods: ['GET', 'POST']
   }
 });
