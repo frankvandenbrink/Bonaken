@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useSocket } from '../hooks/useSocket';
 import type {
   GameState, Player, GameSettings, Card, Suit, PlayedCard,
-  AvailableGame, Bid, BidType, TableCard, RoemDeclaration, PlayerStatus
+  AvailableGame, Bid, BidType, TableCard, RoemDeclaration, PlayerStatus, ChatMessage
 } from '@shared/index';
 
 interface GameContextType {
@@ -59,6 +59,13 @@ interface GameContextType {
   // Error handling
   error: string | null;
   clearError: () => void;
+
+  // Chat
+  chatMessages: ChatMessage[];
+  unreadCount: number;
+  chatOpen: boolean;
+  toggleChat: () => void;
+  sendChat: (text: string) => void;
 
   // Actions
   createGame: (settings: GameSettings) => void;
@@ -126,6 +133,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Rematch state
   const [rematchRequests, setRematchRequests] = useState<string[]>([]);
+
+  // Chat state
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [chatOpen, setChatOpen] = useState(false);
+  const chatOpenRef = useRef(false);
 
   // Error state
   const [error, setError] = useState<string | null>(null);
@@ -350,6 +363,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setPlayerStatuses({});
       }),
 
+      // Chat
+      on('chat-message', ({ message }) => {
+        setChatMessages(prev => [...prev, message]);
+        if (!chatOpenRef.current) {
+          setUnreadCount(prev => prev + 1);
+        }
+      }),
+
+      on('chat-history', ({ messages }) => {
+        setChatMessages(messages);
+      }),
+
       on('error', ({ message }) => {
         setError(message);
       })
@@ -402,6 +427,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setGamePhase(null);
     setPlayers([]);
     setSettings(defaultSettings);
+    setChatMessages([]);
+    setUnreadCount(0);
+    setChatOpen(false);
+    chatOpenRef.current = false;
     window.location.reload();
   }, []);
 
@@ -431,6 +460,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const requestRematch = useCallback(() => {
     emit('request-rematch');
+  }, [emit]);
+
+  const toggleChat = useCallback(() => {
+    setChatOpen(prev => {
+      const next = !prev;
+      chatOpenRef.current = next;
+      if (next) setUnreadCount(0);
+      return next;
+    });
+  }, []);
+
+  const sendChat = useCallback((text: string) => {
+    emit('send-chat', { text });
   }, [emit]);
 
   const clearError = useCallback(() => {
@@ -466,6 +508,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       roundResult,
       playerStatuses,
       rematchRequests,
+      chatMessages,
+      unreadCount,
+      chatOpen,
+      toggleChat,
+      sendChat,
       error,
       clearError,
       createGame,

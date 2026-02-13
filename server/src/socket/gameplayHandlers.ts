@@ -10,6 +10,7 @@ import { dealCards } from '../game/dealing';
 import { determineRoundResult, isGameComplete } from '../game/scoring';
 import { startTimer, cancelTimer } from '../game/timer';
 import { startBidTimer } from './biddingHandlers';
+import { emitSystemMessage } from './chatHandlers';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -168,6 +169,9 @@ function handleTrickComplete(io: TypedServer, game: GameState) {
   });
 
   io.to(game.id).emit('trick-complete', { winnerId, trickPoints: trickPts, tricksWon, playerTrickPoints });
+  if (winner) {
+    emitSystemMessage(io, game.id, `${winner.nickname} wint de slag (${trickPts} punten)`);
+  }
 
   setTimeout(() => {
     game.currentTrick = [];
@@ -207,6 +211,7 @@ function handleRoundComplete(io: TypedServer, game: GameState) {
   game.phase = 'round-end';
 
   io.to(game.id).emit('round-result', result);
+  emitSystemMessage(io, game.id, `Ronde ${game.roundNumber} afgelopen`);
 
   // Check of spel voorbij is
   if (isGameComplete(game.players)) {
@@ -233,6 +238,7 @@ function handleGameEnd(io: TypedServer, game: GameState) {
   console.log('Spel voorbij!', playerStatuses);
 
   io.to(game.id).emit('game-ended', { playerStatuses });
+  emitSystemMessage(io, game.id, 'Het spel is afgelopen!');
   game.lastActivity = Date.now();
 }
 
@@ -248,12 +254,14 @@ function handleRematchRequest(io: TypedServer, socket: TypedSocket, game: GameSt
       playerId: socket.id,
       nickname: player.nickname
     });
+    emitSystemMessage(io, game.id, `${player.nickname} wil een rematch`);
   }
 
   if (game.rematchRequests.length === game.players.length) {
     console.log('Iedereen wil rematch - nieuw spel starten!');
     resetForRematch(game);
     io.to(game.id).emit('rematch-started');
+    emitSystemMessage(io, game.id, 'Rematch gestart!');
     startNextRound(io, game);
   }
 

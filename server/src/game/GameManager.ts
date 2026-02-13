@@ -224,7 +224,7 @@ export class GameManager {
     return game;
   }
 
-  cleanupInactiveGames(): number {
+  cleanupInactiveGames(onCleanup?: (gameId: string) => void): number {
     const now = Date.now();
     const fiveMinutes = 5 * 60 * 1000;
     let cleaned = 0;
@@ -235,6 +235,7 @@ export class GameManager {
           this.playerToGame.delete(player.id);
         }
         this.games.delete(id);
+        onCleanup?.(id);
         cleaned++;
       }
     }

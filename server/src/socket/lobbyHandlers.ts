@@ -3,6 +3,7 @@ import type { ServerToClientEvents, ClientToServerEvents, GameSettings } from 's
 import { gameManager } from '../game/GameManager';
 import { initBiddingState } from '../game/bidding';
 import { startBidTimer } from './biddingHandlers';
+import { emitSystemMessage, getChatHistory } from './chatHandlers';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -68,6 +69,12 @@ export function setupLobbyHandlers(io: TypedServer, socket: TypedSocket) {
       settings: game.settings
     });
 
+    // Send chat history to joining player
+    socket.emit('chat-history', { messages: getChatHistory(game.id) });
+
+    // System message
+    emitSystemMessage(io, game.id, `${nickname} is toegetreden`);
+
     // Broadcast updated game list
     broadcastGameList(io);
 
@@ -118,6 +125,7 @@ export function setupLobbyHandlers(io: TypedServer, socket: TypedSocket) {
 
       // Notify all players game is starting
       io.to(game.id).emit('game-starting');
+      emitSystemMessage(io, game.id, 'Het spel begint!');
 
       // Send each player their hand + table cards (open only for non-bid-winner)
       for (const player of startedGame.players) {
@@ -173,13 +181,19 @@ export function setupLobbyHandlers(io: TypedServer, socket: TypedSocket) {
 
   // Handle disconnect
   socket.on('disconnect', () => {
+    // Capture game + nickname before removal
+    const gameBeforeRemoval = gameManager.getGameByPlayerId(socket.id);
+    const disconnectedPlayer = gameBeforeRemoval?.players.find(p => p.id === socket.id);
+    const disconnectedNickname = disconnectedPlayer?.nickname || 'Onbekend';
+
     const result = gameManager.removePlayer(socket.id);
 
     if (result.game && !result.isEmpty) {
       io.to(result.game.id).emit('player-disconnected', {
         playerId: socket.id,
-        nickname: 'Onbekend'
+        nickname: disconnectedNickname
       });
+      emitSystemMessage(io, result.game.id, `${disconnectedNickname} heeft het spel verlaten`);
       io.to(result.game.id).emit('lobby-updated', {
         players: result.game.players,
         settings: result.game.settings

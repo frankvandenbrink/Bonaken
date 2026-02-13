@@ -5,9 +5,10 @@ import { GameProvider, useGame } from './contexts/GameContext';
 import { StartScreen } from './components/StartScreen';
 import { Lobby } from './components/Lobby';
 import { GameScreen } from './components/GameScreen';
+import { ChatBubble } from './components/ChatBubble';
 
 function GameRouter() {
-  const { gamePhase, leaveGame } = useGame();
+  const { gameId, gamePhase, leaveGame } = useGame();
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
@@ -24,20 +25,18 @@ function GameRouter() {
     return () => { listener.then(l => l.remove()); };
   }, [gamePhase, leaveGame]);
 
-  // Show lobby when in lobby phase
-  if (gamePhase === 'lobby') {
-    return <Lobby />;
-  }
+  const isPlaying = gamePhase === 'dealing' || gamePhase === 'bidding' ||
+    gamePhase === 'card-swap' || gamePhase === 'trump-selection' ||
+    gamePhase === 'playing' || gamePhase === 'round-end' || gamePhase === 'game-end';
 
-  // Show game screen when game starts
-  if (gamePhase === 'dealing' || gamePhase === 'bidding' ||
-      gamePhase === 'card-swap' || gamePhase === 'trump-selection' ||
-      gamePhase === 'playing' || gamePhase === 'round-end' || gamePhase === 'game-end') {
-    return <GameScreen />;
-  }
-
-  // Default: show start screen
-  return <StartScreen />;
+  return (
+    <>
+      {gamePhase === 'lobby' && <Lobby />}
+      {isPlaying && <GameScreen />}
+      {!gamePhase && <StartScreen />}
+      {gameId && <ChatBubble />}
+    </>
+  );
 }
 
 function App() {

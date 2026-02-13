@@ -121,6 +121,18 @@ export interface GameState {
   rematchRequests: string[];
 }
 
+// Chat types
+export type ChatMessageType = 'player' | 'system';
+
+export interface ChatMessage {
+  id: string;
+  type: ChatMessageType;
+  playerId: string | null;   // null for system
+  nickname: string | null;   // null for system
+  text: string;
+  timestamp: number;
+}
+
 // Socket event types
 export interface ServerToClientEvents {
   // Lobby & Game Browser
@@ -179,6 +191,10 @@ export interface ServerToClientEvents {
   'player-disconnected': (data: { playerId: string; nickname: string }) => void;
   'player-reconnected': (data: { playerId: string; nickname: string }) => void;
   'error': (data: { message: string }) => void;
+
+  // Chat
+  'chat-message': (data: { message: ChatMessage }) => void;
+  'chat-history': (data: { messages: ChatMessage[] }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -208,4 +224,7 @@ export interface ClientToServerEvents {
 
   // Connection
   'reconnect-to-game': (data: { gameId: string; nickname: string }) => void;
+
+  // Chat
+  'send-chat': (data: { text: string }) => void;
 }

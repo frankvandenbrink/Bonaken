@@ -11,6 +11,7 @@ import { setupLobbyHandlers } from './socket/lobbyHandlers';
 import { setupBiddingHandlers } from './socket/biddingHandlers';
 import { setupTrumpHandlers } from './socket/trumpHandlers';
 import { setupGameplayHandlers } from './socket/gameplayHandlers';
+import { setupChatHandlers, cleanupChatHistory } from './socket/chatHandlers';
 import { gameManager } from './game/GameManager';
 
 const app = express();
@@ -60,11 +61,12 @@ io.on('connection', (socket) => {
   setupBiddingHandlers(io, socket);
   setupTrumpHandlers(io, socket);
   setupGameplayHandlers(io, socket);
+  setupChatHandlers(io, socket);
 });
 
 // Cleanup inactieve games elke minuut
 setInterval(() => {
-  const cleaned = gameManager.cleanupInactiveGames();
+  const cleaned = gameManager.cleanupInactiveGames(cleanupChatHistory);
   if (cleaned > 0) {
     console.log(`${cleaned} inactieve spellen opgeruimd`);
   }

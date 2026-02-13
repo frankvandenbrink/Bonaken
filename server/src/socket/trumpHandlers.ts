@@ -1,9 +1,11 @@
 import { Server, Socket } from 'socket.io';
 import type { ServerToClientEvents, ClientToServerEvents, Suit } from 'shared';
+import { getSuitName } from 'shared';
 import { gameManager } from '../game/GameManager';
 import { startPlayerTurn } from './gameplayHandlers';
 import { cancelTimer } from '../game/timer';
 import { startTrumpTimer } from './biddingHandlers';
+import { emitSystemMessage } from './chatHandlers';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -129,9 +131,11 @@ export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
 
     game.trump = suit;
 
-    console.log(`Troef gekozen: ${suit} door ${game.players.find(p => p.id === socket.id)?.nickname}`);
+    const selectorName = game.players.find(p => p.id === socket.id)?.nickname || 'Onbekend';
+    console.log(`Troef gekozen: ${suit} door ${selectorName}`);
 
     io.to(game.id).emit('trump-selected', { trump: suit });
+    emitSystemMessage(io, game.id, `${selectorName} kiest ${getSuitName(suit)} als troef`);
 
     // Start speelfase na korte pauze
     setTimeout(() => {

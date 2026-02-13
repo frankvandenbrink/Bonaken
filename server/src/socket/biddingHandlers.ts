@@ -5,6 +5,7 @@ import { isValidBid, getNextBidder, isBiddingComplete, initBiddingState } from '
 import { dealCards } from '../game/dealing';
 import { startTimer, cancelTimer } from '../game/timer';
 import { startPlayerTurn } from './gameplayHandlers';
+import { emitSystemMessage } from './chatHandlers';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -28,6 +29,7 @@ export function startBidTimer(io: TypedServer, game: import('shared').GameState)
 
       io.to(game.id).emit('timer-expired', { playerId, autoAction: 'auto-pas' });
       io.to(game.id).emit('bid-passed', { playerId });
+      emitSystemMessage(io, game.id, `${player.nickname} past`);
 
       // Check of bieden compleet is
       const passedPlayers = new Set(game.players.filter(p => p.hasPassed).map(p => p.id));
@@ -36,7 +38,9 @@ export function startBidTimer(io: TypedServer, game: import('shared').GameState)
       if (complete) {
         if (winner && game.currentBid) {
           game.bidWinner = winner;
+          const winnerName = game.players.find(p => p.id === winner)?.nickname || 'Onbekend';
           io.to(game.id).emit('bidding-complete', { winner, bid: game.currentBid });
+          emitSystemMessage(io, game.id, `${winnerName} wint het bieden`);
           game.phase = 'card-swap';
           game.currentTurn = winner;
 
@@ -46,6 +50,7 @@ export function startBidTimer(io: TypedServer, game: import('shared').GameState)
         } else {
           // Iedereen gepast
           io.to(game.id).emit('all-passed');
+          emitSystemMessage(io, game.id, 'Iedereen heeft gepast, opnieuw delen');
           handleAllPassed(io, game);
         }
       } else {
@@ -242,7 +247,9 @@ export function setupBiddingHandlers(io: TypedServer, socket: TypedSocket) {
     const bid = { playerId: socket.id, type, amount };
     game.currentBid = bid;
 
+    const bidderName = game.players.find(p => p.id === socket.id)?.nickname || 'Onbekend';
     io.to(game.id).emit('bid-placed', { playerId: socket.id, bid });
+    emitSystemMessage(io, game.id, `${bidderName} biedt ${amount}`);
 
     // Bepaal volgende bieder
     const passedPlayers = new Set(game.players.filter(p => p.hasPassed).map(p => p.id));
@@ -250,7 +257,9 @@ export function setupBiddingHandlers(io: TypedServer, socket: TypedSocket) {
 
     if (complete && winner) {
       game.bidWinner = winner;
+      const winnerName = game.players.find(p => p.id === winner)?.nickname || 'Onbekend';
       io.to(game.id).emit('bidding-complete', { winner, bid: game.currentBid });
+      emitSystemMessage(io, game.id, `${winnerName} wint het bieden`);
 
       // Ga naar card-swap fase
       game.phase = 'card-swap';
@@ -310,7 +319,9 @@ export function setupBiddingHandlers(io: TypedServer, socket: TypedSocket) {
       player.hasPassed = true;
     }
 
+    const passerName = game.players.find(p => p.id === socket.id)?.nickname || 'Onbekend';
     io.to(game.id).emit('bid-passed', { playerId: socket.id });
+    emitSystemMessage(io, game.id, `${passerName} past`);
 
     const passedPlayers = new Set(game.players.filter(p => p.hasPassed).map(p => p.id));
     const { complete, winner } = isBiddingComplete(game.biddingOrder, passedPlayers, game.currentBid);
@@ -318,7 +329,9 @@ export function setupBiddingHandlers(io: TypedServer, socket: TypedSocket) {
     if (complete) {
       if (winner && game.currentBid) {
         game.bidWinner = winner;
+        const winnerName = game.players.find(p => p.id === winner)?.nickname || 'Onbekend';
         io.to(game.id).emit('bidding-complete', { winner, bid: game.currentBid });
+        emitSystemMessage(io, game.id, `${winnerName} wint het bieden`);
 
         game.phase = 'card-swap';
         game.currentTurn = winner;
@@ -336,6 +349,7 @@ export function setupBiddingHandlers(io: TypedServer, socket: TypedSocket) {
         startSwapTimer(io, game);
       } else {
         io.to(game.id).emit('all-passed');
+        emitSystemMessage(io, game.id, 'Iedereen heeft gepast, opnieuw delen');
         handleAllPassed(io, game);
       }
     } else {
