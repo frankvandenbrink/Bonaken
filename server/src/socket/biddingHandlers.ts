@@ -99,8 +99,8 @@ export function startSwapTimer(io: TypedServer, game: import('shared').GameState
       io.to(game.id).emit('cards-swapped', { discardCount: discarded.length });
       io.to(playerId).emit('cards-dealt', { hand: player.hand, tableCards: [] });
 
-      // Troefkeuze of zwabber
-      if (game.currentBid?.type === 'zwabber') {
+      // Troefkeuze of zwabber/misère
+      if (game.currentBid?.type === 'zwabber' || game.currentBid?.type === 'misere') {
         game.trump = null;
         game.phase = 'playing';
         io.to(game.id).emit('trump-selected', { trump: null as unknown as import('shared').Suit });

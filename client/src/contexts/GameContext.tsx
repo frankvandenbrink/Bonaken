@@ -203,6 +203,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setCurrentTurn(firstBidder);
         setCurrentBid(null);
         setBidWinner(null);
+        // Reset player round stats for new bidding round
+        setPlayers(prev => prev.map(p => ({
+          ...p,
+          hasPassed: false,
+          tricksWon: 0,
+          trickPoints: 0,
+          declaredRoem: 0
+        })));
       }),
 
       on('bid-placed', ({ playerId: bidderId, bid }) => {
@@ -298,6 +306,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
       on('round-result', (result) => {
         setRoundResult(result);
         setGamePhase('round-end');
+        // Update player statuses from round result
+        setPlayers(prev => prev.map(p => {
+          const playerResult = result.playerResults[p.id];
+          if (playerResult) {
+            return { ...p, status: playerResult.newStatus };
+          }
+          return p;
+        }));
       }),
 
       on('game-ended', ({ playerStatuses: statuses }) => {

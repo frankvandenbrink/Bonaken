@@ -74,8 +74,8 @@ export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
     });
 
     // Bepaal of troefkeuze nodig is
-    if (game.currentBid?.type === 'zwabber') {
-      // Zwabber = geen troef
+    if (game.currentBid?.type === 'zwabber' || game.currentBid?.type === 'misere') {
+      // Zwabber/Misère = geen troef
       game.trump = null;
       game.phase = 'playing';
 

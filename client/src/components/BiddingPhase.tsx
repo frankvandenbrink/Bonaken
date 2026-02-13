@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGame } from '../contexts/GameContext';
 import type { BidType } from '@shared/index';
+import { TurnTimer } from './TurnTimer';
 import styles from './BiddingPhase.module.css';
 
 const BID_TYPE_LABELS: Record<BidType, string> = {
@@ -74,8 +75,7 @@ export function BiddingPhase() {
   const canBonaak = !currentBid || (currentBid.type !== 'bonaak' && currentBid.type !== 'bonaak-roem');
   const canBonaakRoem = currentBid?.type === 'bonaak';
 
-  // Timer calculation
-  const timeRemaining = turnDeadline ? Math.max(0, Math.ceil((turnDeadline - Date.now()) / 1000)) : null;
+  // Timer is handled by TurnTimer component
 
   return (
     <div className={styles.container}>
@@ -161,11 +161,7 @@ export function BiddingPhase() {
         )}
 
         {/* Timer */}
-        {timeRemaining !== null && timeRemaining > 0 && (
-          <div className={`${styles.timer} ${timeRemaining <= 10 ? styles.timerUrgent : ''}`}>
-            {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
-          </div>
-        )}
+        {turnDeadline && <TurnTimer deadline={turnDeadline} />}
       </div>
 
       {/* Bid controls - only when it's your turn */}

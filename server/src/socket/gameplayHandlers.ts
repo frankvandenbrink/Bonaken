@@ -15,7 +15,7 @@ type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 const TRICK_DISPLAY_DELAY = 2500;
-const ROUND_END_DELAY = 1500;
+const ROUND_END_DELAY = 5500;
 
 /**
  * Start een beurt voor een speler, inclusief timer
