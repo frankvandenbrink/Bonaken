@@ -9,7 +9,11 @@ export interface BiddingState {
  * Initialiseer biedvolgorde: speler na dealer, kloksgewijs
  */
 export function initBiddingState(players: Player[], dealerId: string): BiddingState {
-  const dealerIndex = players.findIndex(p => p.id === dealerId);
+  let dealerIndex = players.findIndex(p => p.id === dealerId);
+  if (dealerIndex === -1) {
+    console.warn(`initBiddingState: dealer ${dealerId} niet gevonden, val terug op index 0`);
+    dealerIndex = 0;
+  }
   const biddingOrder: string[] = [];
 
   // Start na de dealer, kloksgewijs

@@ -24,9 +24,9 @@ export function getCardDistribution(playerCount: number): {
     blindCards: number;
     sleepingCards: number;
   }> = {
-    2: { cardsPerPlayer: 6, openCards: 2, blindCards: 1, sleepingCards: 17 },
-    3: { cardsPerPlayer: 6, openCards: 2, blindCards: 1, sleepingCards: 11 },
-    4: { cardsPerPlayer: 6, openCards: 2, blindCards: 1, sleepingCards: 5 },
+    2: { cardsPerPlayer: 6, openCards: 2, blindCards: 0, sleepingCards: 18 },
+    3: { cardsPerPlayer: 6, openCards: 2, blindCards: 0, sleepingCards: 12 },
+    4: { cardsPerPlayer: 6, openCards: 2, blindCards: 0, sleepingCards: 6 },
     5: { cardsPerPlayer: 6, openCards: 2, blindCards: 0, sleepingCards: 0 },
   };
 

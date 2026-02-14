@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto';
 export class GameManager {
   private games: Map<string, GameState> = new Map();
   private playerToGame: Map<string, string> = new Map(); // socketId -> gameId
+  private disconnectTimeouts: Map<string, NodeJS.Timeout> = new Map(); // playerId -> timeout
 
   createGame(hostId: string, hostNickname: string, settings: GameSettings): GameState {
     const id = randomUUID().slice(0, 8);
@@ -222,6 +223,60 @@ export class GameManager {
       }
     }
     return game;
+  }
+
+  setDisconnectTimeout(playerId: string, timeout: NodeJS.Timeout): void {
+    this.disconnectTimeouts.set(playerId, timeout);
+  }
+
+  clearDisconnectTimeout(playerId: string): void {
+    const timeout = this.disconnectTimeouts.get(playerId);
+    if (timeout) {
+      clearTimeout(timeout);
+      this.disconnectTimeouts.delete(playerId);
+    }
+  }
+
+  reconnectPlayer(gameId: string, nickname: string, newSocketId: string): { success: boolean; game?: GameState; player?: Player; oldSocketId?: string } {
+    const game = this.games.get(gameId);
+    if (!game) {
+      return { success: false };
+    }
+
+    const player = game.players.find(p => p.nickname === nickname && !p.isConnected);
+    if (!player) {
+      return { success: false };
+    }
+
+    const oldSocketId = player.id;
+
+    // Update playerToGame map
+    this.playerToGame.delete(oldSocketId);
+    this.playerToGame.set(newSocketId, gameId);
+
+    // Swap socket ID in all game state references
+    player.id = newSocketId;
+    player.isConnected = true;
+
+    if (game.currentDealer === oldSocketId) game.currentDealer = newSocketId;
+    if (game.currentTurn === oldSocketId) game.currentTurn = newSocketId;
+    if (game.bidWinner === oldSocketId) game.bidWinner = newSocketId;
+
+    game.biddingOrder = game.biddingOrder.map(id => id === oldSocketId ? newSocketId : id);
+    game.currentTrick = game.currentTrick.map(pc =>
+      pc.playerId === oldSocketId ? { ...pc, playerId: newSocketId } : pc
+    );
+    game.roemDeclarations = game.roemDeclarations.map(rd =>
+      rd.playerId === oldSocketId ? { ...rd, playerId: newSocketId } : rd
+    );
+    if (game.currentBid && game.currentBid.playerId === oldSocketId) {
+      game.currentBid = { ...game.currentBid, playerId: newSocketId };
+    }
+    game.rematchRequests = game.rematchRequests.map(id => id === oldSocketId ? newSocketId : id);
+
+    game.lastActivity = Date.now();
+
+    return { success: true, game, player, oldSocketId };
   }
 
   cleanupInactiveGames(onCleanup?: (gameId: string) => void): number {

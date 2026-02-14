@@ -45,6 +45,97 @@
 }
 
 /* ============================================
+   TABLE CARDS - Cards on the table during bidding
+   ============================================ */
+
+.tableCardsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.tableCardsLabel {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  opacity: 0.8;
+}
+
+.tableCardsRow {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+}
+
+.tableCard {
+  opacity: 0;
+  animation: tableCardReveal 0.5s ease forwards;
+}
+
+@keyframes tableCardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) rotateY(90deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateY(0deg);
+  }
+}
+
+.tableCardFace {
+  width: 54px;
+  height: 76px;
+  background: linear-gradient(135deg, #fff 0%, #f8f8f8 50%, #f0f0f0 100%);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    0 0 12px rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.tableCardFace.red {
+  color: #c41e3a;
+}
+
+.tableCardFace.black {
+  color: #1a1a1a;
+}
+
+.tableCardRank {
+  font-family: 'Georgia', serif;
+  font-size: 1.2rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.tableCardSuit {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.tableCardBack {
+  width: 54px;
+  height: 76px;
+  background: linear-gradient(135deg, #1a3a5c 0%, #0d2137 100%);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(212, 175, 55, 0.3);
+  font-size: 1.5rem;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
    BID DISPLAY - The auctioneer's podium
    ============================================ */
 

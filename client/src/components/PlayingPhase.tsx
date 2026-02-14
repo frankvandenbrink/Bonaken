@@ -178,7 +178,7 @@ export function PlayingPhase() {
                   {isBidWinner && <span className={styles.bonakerBadge}>B</span>}
                   <span className={styles.statusLabel}>{STATUS_LABELS[player.status] || ''}</span>
                 </span>
-                <span className={styles.scoreValue}>{player.trickPoints}pt / {player.tricksWon}sl</span>
+                <span className={styles.scoreValue}>{isMe ? `${player.trickPoints}pt / ${player.tricksWon}sl` : '—'}</span>
               </div>
             );
           })}

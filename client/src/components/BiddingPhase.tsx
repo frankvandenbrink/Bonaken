@@ -16,6 +16,13 @@ const BID_TYPE_LABELS: Record<BidType, string> = {
  * BiddingPhase - Victorian auction-house styled bidding interface
  * Players bid sequentially, raising the stakes or passing
  */
+const SUIT_SYMBOLS: Record<string, string> = {
+  harten: '♥',
+  ruiten: '♦',
+  klaveren: '♣',
+  schoppen: '♠'
+};
+
 export function BiddingPhase() {
   const {
     players,
@@ -25,7 +32,8 @@ export function BiddingPhase() {
     biddingOrder,
     placeBid,
     passBid,
-    turnDeadline
+    turnDeadline,
+    tableCards
   } = useGame();
 
   const [bidAmount, setBidAmount] = useState(currentBid ? currentBid.amount + 5 : 25);
@@ -85,6 +93,30 @@ export function BiddingPhase() {
         <h2 className={styles.title}>Biedronde</h2>
         <div className={styles.headerLine} />
       </div>
+
+      {/* Table cards display */}
+      {tableCards.length > 0 && (
+        <div className={styles.tableCardsSection}>
+          <span className={styles.tableCardsLabel}>Tafelkaarten</span>
+          <div className={styles.tableCardsRow}>
+            {tableCards.map((tc, i) => {
+              const isRed = tc.card.suit === 'harten' || tc.card.suit === 'ruiten';
+              return (
+                <div key={i} className={styles.tableCard} style={{ animationDelay: `${i * 0.15}s` }}>
+                  {tc.faceUp ? (
+                    <div className={`${styles.tableCardFace} ${isRed ? styles.red : styles.black}`}>
+                      <span className={styles.tableCardRank}>{tc.card.rank}</span>
+                      <span className={styles.tableCardSuit}>{SUIT_SYMBOLS[tc.card.suit]}</span>
+                    </div>
+                  ) : (
+                    <div className={styles.tableCardBack}>?</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Current bid display */}
       <div className={styles.bidDisplay}>

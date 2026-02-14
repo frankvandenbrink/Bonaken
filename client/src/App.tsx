@@ -6,6 +6,7 @@ import { StartScreen } from './components/StartScreen';
 import { Lobby } from './components/Lobby';
 import { GameScreen } from './components/GameScreen';
 import { ChatBubble } from './components/ChatBubble';
+import { DisconnectOverlay } from './components/DisconnectOverlay';
 
 function GameRouter() {
   const { gameId, gamePhase, leaveGame } = useGame();
@@ -43,6 +44,7 @@ function App() {
   return (
     <GameProvider>
       <GameRouter />
+      <DisconnectOverlay />
     </GameProvider>
   );
 }

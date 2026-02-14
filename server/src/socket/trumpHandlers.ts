@@ -86,10 +86,7 @@ export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
       // Start speelfase
       setTimeout(() => {
         io.to(game.id).emit('playing-start');
-        const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
-        const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
-        const firstPlayer = game.players[firstPlayerIndex];
-        startPlayerTurn(io, game, firstPlayer.id);
+        startPlayerTurn(io, game, game.bidWinner!);
       }, 1000);
     } else {
       // Troefkeuze fase
@@ -144,12 +141,8 @@ export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
 
       io.to(game.id).emit('playing-start');
 
-      const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
-      const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
-      const firstPlayer = game.players[firstPlayerIndex];
-
-      console.log(`Spel start! Eerste speler: ${firstPlayer.nickname}`);
-      startPlayerTurn(io, game, firstPlayer.id);
+      console.log(`Spel start! Eerste speler: ${game.players.find(p => p.id === game.bidWinner)?.nickname}`);
+      startPlayerTurn(io, game, game.bidWinner!);
     }, 1500);
 
     game.lastActivity = Date.now();

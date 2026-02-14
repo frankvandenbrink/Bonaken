@@ -133,7 +133,7 @@ export function CreateGameModal({ onClose }: CreateGameModalProps) {
           {/* Info box */}
           <div className={styles.infoBox}>
             <p><strong>Kaarten per speler:</strong> 6 (altijd)</p>
-            <p><strong>Tafelkaarten:</strong> 2 open{settings.maxPlayers <= 4 ? ' + 1 blind' : ''}</p>
+            <p><strong>Tafelkaarten:</strong> 2 open</p>
           </div>
         </div>
 

@@ -8,6 +8,7 @@ import type {
 interface GameContextType {
   // Connection
   isConnected: boolean;
+  isDisconnected: boolean;
 
   // Player
   nickname: string;
@@ -140,6 +141,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [chatOpen, setChatOpen] = useState(false);
   const chatOpenRef = useRef(false);
 
+  // Disconnect state
+  const [isDisconnected, setIsDisconnected] = useState(false);
+
   // Error state
   const [error, setError] = useState<string | null>(null);
 
@@ -169,6 +173,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setGameId(id);
         setGameName(name);
         setGamePhase('lobby');
+        sessionStorage.setItem('bonaken-gameId', id);
       }),
 
       on('game-state', (state) => {
@@ -183,7 +188,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
         if (state.biddingOrder.length > 0) setBiddingOrder(state.biddingOrder);
         if (state.currentTurn) setCurrentTurn(state.currentTurn);
         if (state.trump) setTrump(state.trump);
+        if (state.currentTrick) setCurrentTrick(state.currentTrick);
         setTurnDeadline(state.turnDeadline);
+        setIsDisconnected(false);
+        sessionStorage.setItem('bonaken-gameId', state.id);
       }),
 
       on('lobby-updated', ({ players: newPlayers, settings: newSettings }) => {
@@ -196,7 +204,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }),
 
       on('player-disconnected', ({ playerId: disconnectedId }) => {
-        setPlayers(prev => prev.filter(p => p.id !== disconnectedId));
+        setPlayers(prev => prev.map(p =>
+          p.id === disconnectedId ? { ...p, isConnected: false } : p
+        ));
+      }),
+
+      on('player-reconnected', ({ playerId: reconnectedId, nickname: reconnectedNickname }) => {
+        setPlayers(prev => {
+          const exists = prev.some(p => p.id === reconnectedId);
+          if (exists) {
+            return prev.map(p => p.id === reconnectedId ? { ...p, isConnected: true } : p);
+          }
+          // Player might have a new socket ID - find by nickname
+          return prev.map(p => p.nickname === reconnectedNickname ? { ...p, id: reconnectedId, isConnected: true } : p);
+        });
       }),
 
       on('game-starting', () => {
@@ -392,6 +413,29 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [socket?.id]);
 
+  // Reconnect to game after socket reconnects
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+
+    const storedGameId = sessionStorage.getItem('bonaken-gameId');
+    const storedNickname = localStorage.getItem('bonaken-nickname');
+
+    if (storedGameId && storedNickname && !gameId) {
+      console.log(`Reconnecting to game ${storedGameId} as ${storedNickname}`);
+      socket.emit('reconnect-to-game', { gameId: storedGameId, nickname: storedNickname });
+    }
+  }, [socket, isConnected, gameId]);
+
+  // Detect disconnect while in a game
+  useEffect(() => {
+    if (gameId && !isConnected) {
+      setIsDisconnected(true);
+    }
+    if (isConnected && isDisconnected) {
+      // Socket reconnected, reconnect-to-game will fire from the effect above
+    }
+  }, [isConnected, gameId, isDisconnected]);
+
   // Actions
   const createGame = useCallback((gameSettings: GameSettings) => {
     if (!nickname.trim()) {
@@ -422,6 +466,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [emit]);
 
   const leaveGame = useCallback(() => {
+    sessionStorage.removeItem('bonaken-gameId');
     setGameId(null);
     setGameName(null);
     setGamePhase(null);
@@ -431,6 +476,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setUnreadCount(0);
     setChatOpen(false);
     chatOpenRef.current = false;
+    setIsDisconnected(false);
     window.location.reload();
   }, []);
 
@@ -482,6 +528,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   return (
     <GameContext.Provider value={{
       isConnected,
+      isDisconnected,
       nickname,
       setNickname,
       playerId,

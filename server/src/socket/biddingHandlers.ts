@@ -111,9 +111,7 @@ export function startSwapTimer(io: TypedServer, game: import('shared').GameState
         io.to(game.id).emit('trump-selected', { trump: null as unknown as import('shared').Suit });
         setTimeout(() => {
           io.to(game.id).emit('playing-start');
-          const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
-          const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
-          startPlayerTurn(io, game, game.players[firstPlayerIndex].id);
+          startPlayerTurn(io, game, game.bidWinner!);
         }, 1000);
       } else {
         game.phase = 'trump-selection';
@@ -154,9 +152,7 @@ export function startTrumpTimer(io: TypedServer, game: import('shared').GameStat
         game.phase = 'playing';
         game.lastActivity = Date.now();
         io.to(game.id).emit('playing-start');
-        const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
-        const firstPlayerIndex = (dealerIndex + 1) % game.players.length;
-        startPlayerTurn(io, game, game.players[firstPlayerIndex].id);
+        startPlayerTurn(io, game, game.bidWinner!);
       }, 1500);
 
       game.lastActivity = Date.now();
@@ -171,9 +167,10 @@ export function startTrumpTimer(io: TypedServer, game: import('shared').GameStat
  * Herstart bieden na iedereen gepast
  */
 function handleAllPassed(io: TypedServer, game: import('shared').GameState) {
-  const { hands, tableCards, sleepingCards } = dealCards(game.players);
+  const activePlayers = game.players.filter(p => p.status !== 'erin' && p.status !== 'eruit');
+  const { hands, tableCards, sleepingCards } = dealCards(activePlayers);
 
-  for (const p of game.players) {
+  for (const p of activePlayers) {
     const hand = hands.get(p.id);
     if (hand) p.hand = hand;
     p.hasPassed = false;
@@ -184,12 +181,19 @@ function handleAllPassed(io: TypedServer, game: import('shared').GameState) {
   game.currentBid = null;
   game.bidWinner = null;
 
+  // Roteer deler — sla erin/eruit spelers over
   const dealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
-  const nextDealerIndex = (dealerIndex + 1) % game.players.length;
+  let nextDealerIndex = (dealerIndex + 1) % game.players.length;
+  for (let i = 0; i < game.players.length; i++) {
+    if (game.players[nextDealerIndex].status !== 'erin' && game.players[nextDealerIndex].status !== 'eruit') {
+      break;
+    }
+    nextDealerIndex = (nextDealerIndex + 1) % game.players.length;
+  }
   game.currentDealer = game.players[nextDealerIndex].id;
 
   setTimeout(() => {
-    for (const p of game.players) {
+    for (const p of activePlayers) {
       const playerHand = hands.get(p.id);
       if (playerHand) {
         io.to(p.id).emit('cards-dealt', {
@@ -202,7 +206,7 @@ function handleAllPassed(io: TypedServer, game: import('shared').GameState) {
       }
     }
 
-    const biddingState = initBiddingState(game.players, game.currentDealer);
+    const biddingState = initBiddingState(activePlayers, game.currentDealer);
     game.biddingOrder = biddingState.biddingOrder;
     game.currentTurn = biddingState.firstBidder;
     game.phase = 'bidding';

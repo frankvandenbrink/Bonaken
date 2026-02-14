@@ -177,6 +177,14 @@ function handleTrickComplete(io: TypedServer, game: GameState) {
     game.currentTrick = [];
     io.to(game.id).emit('trick-cleared');
 
+    // Bonaak check: als bieder een slag verliest, ronde direct voorbij
+    const bidType = game.currentBid?.type;
+    if ((bidType === 'bonaak' || bidType === 'bonaak-roem') && winnerId !== game.bidWinner) {
+      emitSystemMessage(io, game.id, 'Bonaak mislukt!');
+      handleRoundComplete(io, game);
+      return;
+    }
+
     const activePlayers = game.players.filter(p => p.status !== 'erin' && p.status !== 'eruit');
     const allCardsPlayed = activePlayers.every(p => p.hand.length === 0);
 
@@ -295,9 +303,18 @@ function resetForRematch(game: GameState) {
 }
 
 function startNextRound(io: TypedServer, game: GameState) {
-  // Roteer deler
+  cancelTimer(game.id);
+  game.turnDeadline = null;
+
+  // Roteer deler — sla erin/eruit spelers over
   const currentDealerIndex = game.players.findIndex(p => p.id === game.currentDealer);
-  const nextDealerIndex = (currentDealerIndex + 1) % game.players.length;
+  let nextDealerIndex = (currentDealerIndex + 1) % game.players.length;
+  for (let i = 0; i < game.players.length; i++) {
+    if (game.players[nextDealerIndex].status !== 'erin' && game.players[nextDealerIndex].status !== 'eruit') {
+      break;
+    }
+    nextDealerIndex = (nextDealerIndex + 1) % game.players.length;
+  }
   game.currentDealer = game.players[nextDealerIndex].id;
 
   // Reset voor nieuwe ronde
