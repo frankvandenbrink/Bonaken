@@ -100,6 +100,48 @@
   gap: var(--space-xs);
   opacity: 0;
   animation: cardReveal 0.5s ease forwards;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+}
+
+.tableCard:hover {
+  transform: translateY(-4px);
+}
+
+.tableCard:hover .cardFace,
+.tableCard:hover .cardBack {
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+.tableCard.selectedCard {
+  transform: translateY(-6px);
+}
+
+.tableCard.selectedCard .cardFace,
+.tableCard.selectedCard .cardBack {
+  border: 2px solid #c41e3a;
+  opacity: 0.7;
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(196, 30, 58, 0.3);
+}
+
+.tableCard.selectedCard .discardOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(196, 30, 58, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  height: 92px;
 }
 
 @keyframes cardReveal {
@@ -259,6 +301,34 @@
   color: #e57373;
   font-weight: bold;
   text-shadow: 0 0 10px rgba(196, 30, 58, 0.5);
+}
+
+/* ============================================
+   SUMMARY SECTION
+   ============================================ */
+
+.summarySection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.selectionSummary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--cream);
+}
+
+.tableDiscardInfo {
+  font-size: 0.8rem;
+  color: var(--gold);
+  opacity: 0.8;
 }
 
 /* ============================================

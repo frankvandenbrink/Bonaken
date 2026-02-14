@@ -347,6 +347,12 @@ function startNextRound(io: TypedServer, game: GameState) {
   game.tableCards = tableCards;
   game.sleepingCards = sleepingCards;
 
+  // Initialize bidding
+  const biddingState = initBiddingState(activePlayers, game.currentDealer);
+  game.biddingOrder = biddingState.biddingOrder;
+  game.currentTurn = biddingState.firstBidder;
+  game.phase = 'bidding';
+
   // Send cards to each active player
   for (const p of activePlayers) {
     const playerSocket = io.sockets.sockets.get(p.id);
@@ -361,11 +367,28 @@ function startNextRound(io: TypedServer, game: GameState) {
     }
   }
 
-  // Initialize bidding
-  const biddingState = initBiddingState(activePlayers, game.currentDealer);
-  game.biddingOrder = biddingState.biddingOrder;
-  game.currentTurn = biddingState.firstBidder;
-  game.phase = 'bidding';
+  // Send full game state to all players for synchronization
+  io.to(game.id).emit('game-state', {
+    id: game.id,
+    name: game.name,
+    phase: game.phase,
+    players: game.players,
+    settings: game.settings,
+    tableCards: game.tableCards,
+    currentBid: game.currentBid,
+    bidWinner: game.bidWinner,
+    biddingOrder: game.biddingOrder,
+    currentTurn: game.currentTurn,
+    trump: game.trump,
+    currentTrick: game.currentTrick,
+    turnDeadline: game.turnDeadline,
+    roemDeclarations: game.roemDeclarations,
+    roundNumber: game.roundNumber,
+    currentDealer: game.currentDealer,
+    sleepingCards: game.sleepingCards,
+    lastActivity: game.lastActivity,
+    rematchRequests: game.rematchRequests
+  });
 
   io.to(game.id).emit('bidding-start', {
     biddingOrder: biddingState.biddingOrder,

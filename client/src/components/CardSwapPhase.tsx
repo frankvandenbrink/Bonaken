@@ -13,6 +13,7 @@ const SUIT_SYMBOLS: Record<Suit, string> = {
 /**
  * CardSwapPhase - The bid winner picks up table cards and discards equal number
  * Victorian reveal moment with card selection interface
+ * Updated: Allow discarding 1-2 table cards as per Bug #14 fix
  */
 export function CardSwapPhase() {
   const {
@@ -26,25 +27,42 @@ export function CardSwapPhase() {
   } = useGame();
 
   const [selectedDiscard, setSelectedDiscard] = useState<string[]>([]);
+  const [selectedTableCards, setSelectedTableCards] = useState<string[]>([]);
 
   const isSwapper = currentTurn === playerId;
   const swapperPlayer = players.find(p => p.id === bidWinner);
-  const requiredDiscard = tableCards.length;
+  const requiredDiscard = tableCards.length; // Must discard exactly this many cards total
 
-  const toggleCard = (cardId: string) => {
+  // Total selected cards (hand + table)
+  const totalSelected = selectedDiscard.length + selectedTableCards.length;
+
+  const toggleHandCard = (cardId: string) => {
     if (!isSwapper) return;
     setSelectedDiscard(prev =>
       prev.includes(cardId)
         ? prev.filter(id => id !== cardId)
-        : prev.length < requiredDiscard
+        : totalSelected < requiredDiscard
+          ? [...prev, cardId]
+          : prev
+    );
+  };
+
+  const toggleTableCard = (cardId: string) => {
+    if (!isSwapper) return;
+    setSelectedTableCards(prev =>
+      prev.includes(cardId)
+        ? prev.filter(id => id !== cardId)
+        : totalSelected < requiredDiscard
           ? [...prev, cardId]
           : prev
     );
   };
 
   const handleConfirm = () => {
-    if (selectedDiscard.length === requiredDiscard) {
-      swapCards(selectedDiscard);
+    if (totalSelected === requiredDiscard) {
+      // Combine hand cards and table cards to discard
+      const allDiscards = [...selectedDiscard, ...selectedTableCards];
+      swapCards(allDiscards);
     }
   };
 
@@ -80,20 +98,31 @@ export function CardSwapPhase() {
       </div>
 
       <p className={styles.instruction}>
-        Bekijk de tafelkaarten en leg <strong>{requiredDiscard}</strong> kaarten af uit je hand
+        Bekijk de tafelkaarten en leg <strong>{requiredDiscard}</strong> kaarten af (uit hand en/of tafel)
       </p>
 
-      {/* Table cards display */}
+      {/* Table cards display - now selectable */}
       <div className={styles.tableCardsSection}>
-        <span className={styles.sectionLabel}>Tafelkaarten</span>
+        <span className={styles.sectionLabel}>
+          Tafelkaarten — Klik om af te leggen
+          {selectedTableCards.length > 0 && (
+            <span className={styles.selectionCount}>
+              ({selectedTableCards.length} geselecteerd)
+            </span>
+          )}
+        </span>
         <div className={styles.tableCardsRow}>
           {tableCards.map((tc, index) => {
             const isRed = tc.card.suit === 'harten' || tc.card.suit === 'ruiten';
+            const isSelected = selectedTableCards.includes(tc.card.id);
             return (
-              <div
+              <button
                 key={tc.card.id}
-                className={`${styles.tableCard} ${tc.faceUp ? styles.faceUp : styles.faceDown}`}
+                className={`${styles.tableCard} ${tc.faceUp ? styles.faceUp : styles.faceDown} ${isSelected ? styles.selectedCard : ''}`}
                 style={{ animationDelay: `${index * 0.15}s` }}
+                onClick={() => toggleTableCard(tc.card.id)}
+                type="button"
+                disabled={!isSwapper}
               >
                 {tc.faceUp ? (
                   <div className={`${styles.cardFace} ${isRed ? styles.red : styles.black}`}>
@@ -106,7 +135,12 @@ export function CardSwapPhase() {
                   </div>
                 )}
                 <span className={styles.cardLabel}>{tc.faceUp ? 'Open' : 'Blind'}</span>
-              </div>
+                {isSelected && (
+                  <div className={styles.discardOverlay}>
+                    <span className={styles.discardIcon}>✗</span>
+                  </div>
+                )}
+              </button>
             );
           })}
         </div>
@@ -115,10 +149,10 @@ export function CardSwapPhase() {
       {/* Hand - select cards to discard */}
       <div className={styles.handSection}>
         <span className={styles.sectionLabel}>
-          Jouw Hand — Selecteer {requiredDiscard} kaarten om af te leggen
+          Jouw Hand — Selecteer kaarten om af te leggen
           {selectedDiscard.length > 0 && (
             <span className={styles.selectionCount}>
-              ({selectedDiscard.length}/{requiredDiscard})
+              ({selectedDiscard.length} geselecteerd)
             </span>
           )}
         </span>
@@ -131,7 +165,7 @@ export function CardSwapPhase() {
               <button
                 key={card.id}
                 className={`${styles.handCard} ${isSelected ? styles.selectedCard : ''}`}
-                onClick={() => toggleCard(card.id)}
+                onClick={() => toggleHandCard(card.id)}
                 type="button"
               >
                 <div className={`${styles.cardFace} ${isRed ? styles.red : styles.black}`}>
@@ -149,17 +183,27 @@ export function CardSwapPhase() {
         </div>
       </div>
 
-      {/* Confirm button */}
-      <button
-        className={`${styles.confirmButton} ${selectedDiscard.length === requiredDiscard ? styles.ready : ''}`}
-        onClick={handleConfirm}
-        disabled={selectedDiscard.length !== requiredDiscard}
-        type="button"
-      >
-        {selectedDiscard.length === requiredDiscard
-          ? 'Bevestig Ruil'
-          : `Selecteer nog ${requiredDiscard - selectedDiscard.length} kaart${requiredDiscard - selectedDiscard.length !== 1 ? 'en' : ''}`}
-      </button>
+      {/* Summary and Confirm button */}
+      <div className={styles.summarySection}>
+        <div className={styles.selectionSummary}>
+          <span>Totaal geselecteerd: {totalSelected}/{requiredDiscard}</span>
+          {selectedTableCards.length > 0 && (
+            <span className={styles.tableDiscardInfo}>
+              ({selectedTableCards.length} tafelkaart{selectedTableCards.length !== 1 ? 'en' : ''}, {selectedDiscard.length} handkaart{selectedDiscard.length !== 1 ? 'en' : ''})
+            </span>
+          )}
+        </div>
+        <button
+          className={`${styles.confirmButton} ${totalSelected === requiredDiscard ? styles.ready : ''}`}
+          onClick={handleConfirm}
+          disabled={totalSelected !== requiredDiscard}
+          type="button"
+        >
+          {totalSelected === requiredDiscard
+            ? 'Bevestig Ruil'
+            : `Selecteer nog ${requiredDiscard - totalSelected} kaart${requiredDiscard - totalSelected !== 1 ? 'en' : ''}`}
+        </button>
+      </div>
     </div>
   );
 }
