@@ -173,7 +173,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setGameId(id);
         setGameName(name);
         setGamePhase('lobby');
-        sessionStorage.setItem('bonaken-gameId', id);
+        localStorage.setItem('bonaken-gameId', id);
       }),
 
       on('game-state', (state) => {
@@ -191,7 +191,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         if (state.currentTrick) setCurrentTrick(state.currentTrick);
         setTurnDeadline(state.turnDeadline);
         setIsDisconnected(false);
-        sessionStorage.setItem('bonaken-gameId', state.id);
+        localStorage.setItem('bonaken-gameId', state.id);
       }),
 
       on('lobby-updated', ({ players: newPlayers, settings: newSettings }) => {
@@ -417,7 +417,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    const storedGameId = sessionStorage.getItem('bonaken-gameId');
+    const storedGameId = localStorage.getItem('bonaken-gameId');
     const storedNickname = localStorage.getItem('bonaken-nickname');
 
     if (storedGameId && storedNickname && !gameId) {
@@ -466,7 +466,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [emit]);
 
   const leaveGame = useCallback(() => {
-    sessionStorage.removeItem('bonaken-gameId');
+    localStorage.removeItem('bonaken-gameId');
     setGameId(null);
     setGameName(null);
     setGamePhase(null);
