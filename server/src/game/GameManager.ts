@@ -243,7 +243,13 @@ export class GameManager {
       return { success: false };
     }
 
-    const player = game.players.find(p => p.nickname === nickname && !p.isConnected);
+    // Find by nickname: prefer disconnected player, but also handle fast reconnect
+    // where the old socket hasn't been marked disconnected yet
+    let player = game.players.find(p => p.nickname === nickname && !p.isConnected);
+    if (!player) {
+      // Fast reconnect: player still marked connected but with old socket ID
+      player = game.players.find(p => p.nickname === nickname && p.id !== newSocketId);
+    }
     if (!player) {
       return { success: false };
     }

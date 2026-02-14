@@ -413,18 +413,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [socket?.id]);
 
-  // Reconnect to game after socket reconnects
+  // Reconnect to game after socket (re)connects
   useEffect(() => {
     if (!socket || !isConnected) return;
 
     const storedGameId = localStorage.getItem('bonaken-gameId');
     const storedNickname = localStorage.getItem('bonaken-nickname');
 
-    if (storedGameId && storedNickname && !gameId) {
+    if (storedGameId && storedNickname) {
       console.log(`Reconnecting to game ${storedGameId} as ${storedNickname}`);
       socket.emit('reconnect-to-game', { gameId: storedGameId, nickname: storedNickname });
     }
-  }, [socket, isConnected, gameId]);
+  }, [socket, isConnected]);
 
   // Detect disconnect while in a game
   useEffect(() => {
