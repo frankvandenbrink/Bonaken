@@ -397,6 +397,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }),
 
       on('error', ({ message }) => {
+        // Clear stale game data when reconnect fails (e.g. after server restart)
+        if (message === 'Kan niet opnieuw verbinden') {
+          localStorage.removeItem('bonaken-gameId');
+          setIsDisconnected(false);
+          return;
+        }
         setError(message);
       })
     ];
