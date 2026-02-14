@@ -183,13 +183,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setPlayers(state.players);
         setSettings(state.settings);
         setTableCards(state.tableCards);
-        if (state.currentBid) setCurrentBid(state.currentBid);
-        if (state.bidWinner) setBidWinner(state.bidWinner);
-        if (state.biddingOrder.length > 0) setBiddingOrder(state.biddingOrder);
-        if (state.currentTurn) setCurrentTurn(state.currentTurn);
-        if (state.trump) setTrump(state.trump);
-        if (state.currentTrick) setCurrentTrick(state.currentTrick);
+        setCurrentBid(state.currentBid ?? null);
+        setBidWinner(state.bidWinner ?? null);
+        setBiddingOrder(state.biddingOrder ?? []);
+        setCurrentTurn(state.currentTurn ?? null);
+        setTrump(state.trump ?? null);
+        setCurrentTrick(state.currentTrick ?? []);
         setTurnDeadline(state.turnDeadline);
+        setRoemDeclarations(state.roemDeclarations ?? []);
+        setValidCardIds([]);
+        setTrickWinner(null);
         setIsDisconnected(false);
         localStorage.setItem('bonaken-gameId', state.id);
       }),
@@ -237,6 +240,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setCurrentTurn(firstBidder);
         setCurrentBid(null);
         setBidWinner(null);
+        setTrump(null);
+        setCurrentTrick([]);
+        setTrickWinner(null);
+        setValidCardIds([]);
+        setRoemDeclarations([]);
+        setRoundResult(null);
+        setTurnDeadline(null);
         // Reset player round stats for new bidding round
         setPlayers(prev => prev.map(p => ({
           ...p,

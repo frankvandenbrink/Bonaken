@@ -132,9 +132,17 @@ All players start at `suf`:
 ## Development Workflow
 1. Test each feature in browser using Chrome DevTools
 2. Iterate until feature works correctly
-3. Commit with detailed Dutch message describing the feature
-4. Update implementation_plan.md checkboxes
-5. Update this file with completed features
+3. Write automated Socket.io test scripts for bug fixes and new features (in `test_scripts/`)
+4. Run all existing tests to verify no regressions
+5. Commit with detailed Dutch message describing the feature
+6. Update implementation_plan.md checkboxes
+7. Update this file with completed features
+
+## Testing
+- **Test scripts:** `test_scripts/` directory with Socket.io client tests
+- **Run:** `node test_scripts/<test>.mjs` (requires server running on localhost:3001)
+- **Pattern:** Event queue with buffered socket events, `socket.take(event, timeout)` for async assertions
+- **Always write tests** after fixing bugs or adding features — verify the fix works and prevent regressions
 
 ## Completed Features
 - [x] Fase 1: Project Foundation (monorepo + WebSocket)
@@ -145,7 +153,7 @@ All players start at `suf`:
 - [x] Fase 6: Trick-Taking (gameplay with follow-suit rules)
 - [x] Fase 7: Scoring (Leimuiden status progression system)
 - [x] Fase 8: Game End/Rematch (standings + rematch voting)
-- [~] Fase 9: Turn Timers (implemented; disconnect/reconnect NOT done)
+- [x] Fase 9: Turn Timers + Disconnect/Reconnect
 - [x] Fase 10: Visual Polish (Victorian/casino theme, SVG cards, Web Audio sounds)
 - [x] Android Native App (Capacitor wrapper, APK builds)
 - [x] Production Deployment (Docker + nginx on VPS)
@@ -156,9 +164,7 @@ All players start at `suf`:
 - **Bugs API:** https://bonaken-board.frankvdbrink.nl/api/agent/bugs — Fetch this endpoint to get current reported bugs
 
 ## Known Gaps / TODO
-- **Disconnect/Reconnect:** No `reconnect-to-game` handler, no DisconnectOverlay component, players can't rejoin mid-game
 - **Error handling:** No React error boundaries, no comprehensive input validation, no Dutch error messages
-- **Testing:** Zero automated tests, no systematic edge case validation
 - **Advanced rules not yet implemented:**
   - Troefboer verzaken (withholding trump jack)
   - Vals roemen penalty (instant `erin` + 0 points)

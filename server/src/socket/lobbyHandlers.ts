@@ -212,23 +212,49 @@ export function setupLobbyHandlers(io: TypedServer, socket: TypedSocket) {
     };
     socket.emit('game-state', sanitizedGame);
 
-    // Send player's hand
-    socket.emit('cards-dealt', {
-      hand: player.hand,
-      tableCards: game.tableCards
-    });
+    // Send player's hand (skip if empty, e.g. during round-end before new deal)
+    if (player.hand.length > 0) {
+      socket.emit('cards-dealt', {
+        hand: player.hand,
+        tableCards: game.tableCards
+      });
+    }
 
     // Send chat history
     socket.emit('chat-history', { messages: getChatHistory(game.id) });
 
-    // If it's this player's turn, re-emit turn-start
-    if (game.currentTurn === socket.id && game.phase === 'playing') {
-      const validCardIds = getValidCardIds(player.hand, game.currentTrick, game.trump);
-      socket.emit('turn-start', {
-        playerId: socket.id,
-        validCardIds,
-        deadline: game.turnDeadline
+    // Re-emit phase-specific events so the client can render correctly
+    if (game.phase === 'bidding') {
+      socket.emit('bidding-start', {
+        biddingOrder: game.biddingOrder,
+        firstBidder: game.currentTurn || game.biddingOrder[0]
       });
+      if (game.currentBid) {
+        socket.emit('bid-placed', { playerId: game.currentBid.playerId, bid: game.currentBid });
+      }
+    } else if (game.phase === 'card-swap') {
+      const revealedTableCards = game.tableCards.map(tc => ({ ...tc, faceUp: true }));
+      socket.emit('card-swap-start', { playerId: game.bidWinner!, tableCards: revealedTableCards });
+    } else if (game.phase === 'trump-selection') {
+      socket.emit('trump-selection-start', { selectorId: game.bidWinner! });
+    } else if (game.phase === 'playing') {
+      socket.emit('playing-start');
+      if (game.trump) {
+        socket.emit('trump-selected', { trump: game.trump });
+      }
+      // Re-emit current trick cards
+      for (const pc of game.currentTrick) {
+        socket.emit('card-played', { playerId: pc.playerId, card: pc.card });
+      }
+      // If it's this player's turn, re-emit turn-start
+      if (game.currentTurn === socket.id) {
+        const validCardIds = getValidCardIds(player.hand, game.currentTrick, game.trump);
+        socket.emit('turn-start', {
+          playerId: socket.id,
+          validCardIds,
+          deadline: game.turnDeadline
+        });
+      }
     }
 
     // Notify others
