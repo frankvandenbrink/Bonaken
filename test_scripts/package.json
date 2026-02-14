@@ -1,0 +1,8 @@
+{
+  "name": "bonaken-test-scripts",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "socket.io-client": "^4.7.4"
+  }
+}
