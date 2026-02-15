@@ -428,6 +428,53 @@
 }
 
 /* ============================================
+   ROEM DECLARATION BUTTON
+   ============================================ */
+
+.roemButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: roemPulse 2s ease-in-out infinite;
+}
+
+@keyframes roemPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(220, 20, 60, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(220, 20, 60, 0.7);
+    transform: scale(1.02);
+  }
+}
+
+.roemButton:hover {
+  background: linear-gradient(135deg, #A00000 0%, #FF1744 100%);
+  transform: scale(1.05);
+}
+
+.roemIcon {
+  font-size: 1.2rem;
+  color: var(--gold);
+}
+
+.roemLabel {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 

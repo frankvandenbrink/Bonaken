@@ -129,27 +129,64 @@ All players start at `suf`:
 - **Client → Server:** 11 events (lobby, bidding, card swap, trump, gameplay, connection)
 - All events fully typed via `ServerToClientEvents` and `ClientToServerEvents` in shared/src/index.ts
 
-## Bug Fixing Workflow
+## Bug Board Auto-Fix Workflow
 
-When fixing bugs reported via the bug board:
+**Wie doet wat:**
+- **Frits (AI):** Detecteert bugs, analyseert, fixt, bouwt APK, uploadt, update board, pusht code
+- **Frank (mens):** Test de APK, geeft feedback via board comments
 
-1. **Analyze** the bug description AND all user comments for context
-2. **Write a test** that reproduces the bug before fixing it
-3. **Fix the bug** in the source code
-4. **Run ALL tests** to ensure the fix doesn't break anything else:
-   ```bash
-   npm test
-   # or
-   npm run test:all
-   ```
-5. **Only commit** if all tests pass
-6. **Build and deploy** the APK
+**Volledige workflow wanneer een bug gemeld wordt:**
 
-### Test Requirements
-- Every bug fix must include a test that would have caught the bug
-- Tests should be descriptive: `should handle card swap when player has 8 cards`
-- Run full test suite before committing - never commit with failing tests
-- If tests don't exist yet, create them as part of the bug fix
+### 1. Detectie (automatisch)
+- Bug board watcher detecteert nieuwe bug/comment
+- Telegram notificatie naar Frits met bug details
+
+### 2. Analyse (Frits)
+- Lees volledige bug context (titel + beschrijving + ALLE comments)
+- Classificeer: echte bug vs vraag/opmerking
+- Als onduidelijk: vraag om verduidelijking op board
+
+### 3. Fix (Frits)
+```bash
+# Schrijf test die de bug reproduceert
+# Fix de bug
+# Run ALLE tests - commit alleen als alles passed
+cd ~/Development/Bonaken
+npm test
+```
+
+### 4. Build APK (Frits)
+```bash
+cd ~/Development/Bonaken/android
+./gradlew assembleRelease
+```
+
+### 5. Deploy APK (Frits)
+```bash
+# Upload naar VPS (GEEN container restart nodig!)
+scp app/build/outputs/apk/release/Bonaken-*.apk \
+  root@85.215.189.34:/srv/docker/bonaken/apk/
+
+# Server detecteert automatisch nieuwste APK (via mtime)
+```
+
+### 6. Update Board (Frits)
+- Status wijzigen: `open` → `opgelost`
+- Comment plaatsen: "✅ Opgelost! Download: https://bonaken-board.frankvdbrink.nl/download/apk"
+
+### 7. Git Push (Frits)
+```bash
+git add .
+git commit -m "fix: [bug beschrijving] - closes #[bug-nummer]"
+git push origin main
+```
+
+### 8. Test (Frank)
+- Download APK van board
+- Test of bug opgelost is
+- Feedback via board comments
+
+**Container restart is NOOIT nodig voor nieuwe APK!** De server checkt bij elke request welke file de nieuwste is.
 
 ## Development Workflow
 1. Test each feature in browser using Chrome DevTools

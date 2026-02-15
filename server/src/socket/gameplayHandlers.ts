@@ -11,6 +11,8 @@ import { determineRoundResult, isGameComplete } from '../game/scoring';
 import { startTimer, cancelTimer } from '../game/timer';
 import { startBidTimer } from './biddingHandlers';
 import { emitSystemMessage } from './chatHandlers';
+import { detectRoem } from '../game/roem';
+import type { RoemDeclaration } from 'shared';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -435,6 +437,64 @@ export function setupGameplayHandlers(io: TypedServer, socket: TypedSocket) {
     }
 
     handleRematchRequest(io, socket, game);
+  });
+
+  socket.on('declare-roem', () => {
+    const game = gameManager.getGameByPlayerId(socket.id);
+
+    if (!game) {
+      socket.emit('error', { message: 'Je bent niet in een spel' });
+      return;
+    }
+
+    // Only bid winner can declare roem
+    if (game.bidWinner !== socket.id) {
+      socket.emit('error', { message: 'Alleen de hoogste bieder kan roem melden' });
+      return;
+    }
+
+    // Can only declare roem after trump is selected, before playing starts
+    if (game.phase !== 'playing') {
+      socket.emit('error', { message: 'Je kunt alleen roem melden tijdens het spel' });
+      return;
+    }
+
+    const player = game.players.find(p => p.id === socket.id);
+    if (!player || !game.trump) {
+      socket.emit('error', { message: 'Kan roem niet detecteren' });
+      return;
+    }
+
+    // Detect roem in player's hand
+    const declarations = detectRoem(player.hand, game.trump);
+    
+    if (declarations.length === 0) {
+      socket.emit('error', { message: 'Je hebt geen roem op hand' });
+      return;
+    }
+
+    // Add player info to declarations
+    const playerDeclarations: RoemDeclaration[] = declarations.map(d => ({
+      ...d,
+      playerId: socket.id
+    }));
+
+    // Store declarations
+    game.roemDeclarations = playerDeclarations;
+
+    // Calculate total points
+    const totalPoints = playerDeclarations.reduce((sum, d) => sum + d.points, 0);
+    player.declaredRoem = totalPoints;
+
+    // Notify all players
+    io.to(game.id).emit('roem-declared', { 
+      declarations: playerDeclarations
+    });
+
+    // System message
+    emitSystemMessage(io, game.id, `${player.nickname} meldt roem: ${totalPoints} punten`);
+
+    console.log(`${player.nickname} declared roem: ${totalPoints} points`);
   });
 }
 

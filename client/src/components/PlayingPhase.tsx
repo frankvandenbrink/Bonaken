@@ -41,12 +41,16 @@ export function PlayingPhase() {
     playerId,
     trickWinner,
     bidWinner,
-    turnDeadline
+    turnDeadline,
+    declareRoem,
+    roemDeclarations
   } = useGame();
 
   const isMyTurn = currentTurn === playerId;
   const currentPlayer = players.find(p => p.id === currentTurn);
   const winnerPlayer = trickWinner ? players.find(p => p.id === trickWinner) : null;
+  const isBidWinner = bidWinner === playerId;
+  const hasDeclaredRoem = roemDeclarations.length > 0;
 
   // Get card position based on player index relative to current player
   const getCardPosition = (playerIndex: number, totalPlayers: number) => {
@@ -78,6 +82,17 @@ export function PlayingPhase() {
             <span className={styles.trumpSymbol}>{SUIT_SYMBOLS[trump]}</span>
             <span className={styles.trumpName}>{SUIT_NAMES[trump]}</span>
           </div>
+        )}
+
+        {/* Roem Declaration Button - Only for bid winner before playing */}
+        {isBidWinner && !hasDeclaredRoem && currentTrick.length === 0 && (
+          <button 
+            className={styles.roemButton}
+            onClick={() => declareRoem([])}
+          >
+            <span className={styles.roemIcon}>★</span>
+            <span className={styles.roemLabel}>Meld Roem</span>
+          </button>
         )}
 
         {/* Turn Indicator */}
