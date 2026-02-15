@@ -104,21 +104,11 @@ export function startSwapTimer(io: TypedServer, game: import('shared').GameState
       io.to(game.id).emit('cards-swapped', { discardCount: discarded.length });
       io.to(playerId).emit('cards-dealt', { hand: player.hand, tableCards: [] });
 
-      // Troefkeuze of zwabber/misère
-      if (game.currentBid?.type === 'zwabber' || game.currentBid?.type === 'misere') {
-        game.trump = null;
-        game.phase = 'playing';
-        io.to(game.id).emit('trump-selected', { trump: null as unknown as import('shared').Suit });
-        setTimeout(() => {
-          io.to(game.id).emit('playing-start');
-          startPlayerTurn(io, game, game.bidWinner!);
-        }, 1000);
-      } else {
-        game.phase = 'trump-selection';
-        game.currentTurn = playerId;
-        io.to(game.id).emit('trump-selection-start', { selectorId: playerId });
-        startTrumpTimer(io, game);
-      }
+      // Altijd troefkeuze fase (geen misère/zwabber meer)
+      game.phase = 'trump-selection';
+      game.currentTurn = playerId;
+      io.to(game.id).emit('trump-selection-start', { selectorId: playerId });
+      startTrumpTimer(io, game);
       game.lastActivity = Date.now();
     }
   });

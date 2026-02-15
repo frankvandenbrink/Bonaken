@@ -38,8 +38,8 @@ export function isValidBid(newType: BidType, newAmount: number, currentBid: Bid 
   // Eerste bod: minimaal 25
   if (!currentBid) {
     if (newType === 'normal') return newAmount >= 25 && newAmount % 5 === 0;
-    if (newType === 'misere') return true; // Misere mag altijd als eerste bod
-    return false; // Zwabber/bonaak niet als eerste bod
+    if (newType === 'bonaak') return true;
+    return false;
   }
 
   switch (newType) {
@@ -47,20 +47,6 @@ export function isValidBid(newType: BidType, newAmount: number, currentBid: Bid 
       // Moet hoger zijn dan huidig bod, in stappen van 5
       if (currentBid.type !== 'normal') return false;
       return newAmount > currentBid.amount && newAmount % 5 === 0;
-
-    case 'misere':
-      // Boven 100, onder 105
-      if (currentBid.type === 'misere') return true; // Meerdere misere toegestaan
-      if (currentBid.type === 'normal') return currentBid.amount <= 100;
-      return false;
-
-    case 'zwabber':
-      // Boven 125, onder 130
-      if (currentBid.type === 'bonaak' || currentBid.type === 'bonaak-roem') return false;
-      if (currentBid.type === 'zwabber') return false;
-      if (currentBid.type === 'misere') return true;
-      if (currentBid.type === 'normal') return currentBid.amount <= 125;
-      return false;
 
     case 'bonaak':
       // Hoogste bod, alleen overtroffen door bonaak + roem
@@ -97,7 +83,7 @@ export function getNextBidder(biddingOrder: string[], currentBidderId: string, p
 }
 
 /**
- * Check of het bieden compleet is (1 bieder over, of speciale gevallen)
+ * Check of het bieden compleet is (1 bieder over)
  */
 export function isBiddingComplete(biddingOrder: string[], passedPlayers: Set<string>, currentBid: Bid | null): {
   complete: boolean;
@@ -108,15 +94,6 @@ export function isBiddingComplete(biddingOrder: string[], passedPlayers: Set<str
   // Als iedereen gepast heeft
   if (activeBidders.length === 0) {
     return { complete: true, winner: null };
-  }
-
-  // Bij misere: meerdere spelers mogen meegaan, maar bieden stopt als iedereen heeft gekozen
-  if (currentBid?.type === 'misere') {
-    // Misere is speciaal: iedereen mag mee-miseren
-    // Bieden is pas compleet als alle niet-gepaste spelers hun keuze hebben gemaakt
-    if (activeBidders.length === 1) {
-      return { complete: true, winner: activeBidders[0] };
-    }
   }
 
   // 1 bieder over = winnaar

@@ -42,7 +42,7 @@ export type GamePhase =
   | 'game-end';
 
 // Bied types
-export type BidType = 'normal' | 'misere' | 'zwabber' | 'bonaak' | 'bonaak-roem';
+export type BidType = 'normal' | 'bonaak' | 'bonaak-roem';
 
 export interface Bid {
   playerId: string;

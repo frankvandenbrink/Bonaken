@@ -46,16 +46,6 @@ export function determineRoundResult(
   let bidAchieved: boolean;
 
   switch (bid.type) {
-    case 'misere':
-      // Misère: 0 slagen halen
-      bidAchieved = bidder.tricksWon === 0;
-      break;
-    case 'zwabber':
-      // Zwabber: alle slagen zonder troef
-      bidAchieved = players
-        .filter(p => p.id !== bidWinner && p.status !== 'erin' && p.status !== 'eruit')
-        .every(p => p.tricksWon === 0);
-      break;
     case 'bonaak':
     case 'bonaak-roem':
       // Bonaak: alle slagen met troef

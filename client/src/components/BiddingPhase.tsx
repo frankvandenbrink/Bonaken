@@ -6,8 +6,6 @@ import styles from './BiddingPhase.module.css';
 
 const BID_TYPE_LABELS: Record<BidType, string> = {
   normal: 'Bod',
-  misere: 'Misère',
-  zwabber: 'Zwabber',
   bonaak: 'Bonaak',
   'bonaak-roem': 'Bonaak + Roem'
 };
@@ -52,8 +50,6 @@ export function BiddingPhase() {
 
   const handleSpecialBid = (type: BidType) => {
     const amounts: Record<string, number> = {
-      misere: 105,
-      zwabber: 130,
       bonaak: 200,
       'bonaak-roem': 250
     };
@@ -78,8 +74,6 @@ export function BiddingPhase() {
   }
 
   // Determine which special bids are available
-  const canMisere = !currentBid || currentBid.amount < 105;
-  const canZwabber = !currentBid || currentBid.amount < 130;
   const canBonaak = !currentBid || (currentBid.type !== 'bonaak' && currentBid.type !== 'bonaak-roem');
   const canBonaakRoem = currentBid?.type === 'bonaak';
 
@@ -230,26 +224,6 @@ export function BiddingPhase() {
 
           {/* Special bids */}
           <div className={styles.specialBids}>
-            {canMisere && (
-              <button
-                className={`${styles.specialButton} ${styles.misere}`}
-                onClick={() => handleSpecialBid('misere')}
-                type="button"
-              >
-                <span className={styles.specialIcon}>☽</span>
-                Misère
-              </button>
-            )}
-            {canZwabber && (
-              <button
-                className={`${styles.specialButton} ${styles.zwabber}`}
-                onClick={() => handleSpecialBid('zwabber')}
-                type="button"
-              >
-                <span className={styles.specialIcon}>⚡</span>
-                Zwabber
-              </button>
-            )}
             {canBonaak && (
               <button
                 className={`${styles.specialButton} ${styles.bonaak}`}

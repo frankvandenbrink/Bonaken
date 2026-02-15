@@ -75,26 +75,11 @@ export function setupTrumpHandlers(io: TypedServer, socket: TypedSocket) {
       tableCards: []
     });
 
-    // Bepaal of troefkeuze nodig is
-    if (game.currentBid?.type === 'zwabber' || game.currentBid?.type === 'misere') {
-      // Zwabber/Misère = geen troef
-      game.trump = null;
-      game.phase = 'playing';
-
-      io.to(game.id).emit('trump-selected', { trump: null as unknown as Suit });
-
-      // Start speelfase
-      setTimeout(() => {
-        io.to(game.id).emit('playing-start');
-        startPlayerTurn(io, game, game.bidWinner!);
-      }, 1000);
-    } else {
-      // Troefkeuze fase
-      game.phase = 'trump-selection';
-      game.currentTurn = socket.id;
-      io.to(game.id).emit('trump-selection-start', { selectorId: socket.id });
-      startTrumpTimer(io, game);
-    }
+    // Altijd troefkeuze fase (geen misère/zwabber meer)
+    game.phase = 'trump-selection';
+    game.currentTurn = socket.id;
+    io.to(game.id).emit('trump-selection-start', { selectorId: socket.id });
+    startTrumpTimer(io, game);
 
     game.lastActivity = Date.now();
   });
