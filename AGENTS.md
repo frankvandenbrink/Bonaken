@@ -129,6 +129,28 @@ All players start at `suf`:
 - **Client → Server:** 11 events (lobby, bidding, card swap, trump, gameplay, connection)
 - All events fully typed via `ServerToClientEvents` and `ClientToServerEvents` in shared/src/index.ts
 
+## Bug Fixing Workflow
+
+When fixing bugs reported via the bug board:
+
+1. **Analyze** the bug description AND all user comments for context
+2. **Write a test** that reproduces the bug before fixing it
+3. **Fix the bug** in the source code
+4. **Run ALL tests** to ensure the fix doesn't break anything else:
+   ```bash
+   npm test
+   # or
+   npm run test:all
+   ```
+5. **Only commit** if all tests pass
+6. **Build and deploy** the APK
+
+### Test Requirements
+- Every bug fix must include a test that would have caught the bug
+- Tests should be descriptive: `should handle card swap when player has 8 cards`
+- Run full test suite before committing - never commit with failing tests
+- If tests don't exist yet, create them as part of the bug fix
+
 ## Development Workflow
 1. Test each feature in browser using Chrome DevTools
 2. Iterate until feature works correctly
